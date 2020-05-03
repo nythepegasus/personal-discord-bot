@@ -1,9 +1,15 @@
 import os
 import discord
 import json
-from phrases_module import add_phrase, update_phrase, remove_phrase
+# from phrases_module import add_phrase, update_phrase, remove_phrase
 
 words_to_track_file = "phrases.json"
+
+tonys_a_cunt = [
+        "\u0628",
+        "\u064d",
+        "\u0631",
+]
 
 def add_phrase(phrase):
     data = json.load(open(words_to_track_file))
@@ -18,7 +24,7 @@ def add_phrase(phrase):
             return "Phrase too short!"
         elif len(phrase) >= 35:
             return "Phrase too long!"
-        elif "\u0628" in phrase:
+        elif any(bad in phrase for bad in tonys_a_cunt):
             return "You're a cunt!"
     add_phrase = {
         "uid": cur_index,
