@@ -66,7 +66,8 @@ async def on_message(message):
     if message.author == client.user:
         return
     if any(bad in message.content for bad in tonys_a_cunt):
-        message.delete()
+        await message.delete()
+        await message.author.send_message("You're a cunt for trying that.")
     mapping = [("buh!help ", ""), ("buh!add_phrase ", ""), ("buh!ap ", ""), ("buh!phrases_counts ", ""), ("buh!pc ", ""), ("buh!remove_phrase ", ""), ("buh!rp ", "")]
     if "buh!help" in message.content:
         await message.channel.send("buh!add_phrase\t\tAdds phrase to count\nbuh!phrases_counts\t\tShows current phrases counts.")
