@@ -1,41 +1,47 @@
 import os
 import discord
-import csv
+import json
 
-csv.register_dialect('mydialect', delimiter="|")
-
-words_to_track_file = "phrases.csv"
-
-fields = ['phrase', 'times_said']
+words_to_track_file = "phrases.json"
 
 def add_phrase(phrase):
-    with open(words_to_track_file, "r") as f:
-        csvreader = csv.DictReader(f, fieldnames=fields, dialect='mydialect')
-        for row in csvreader:
-            if phrase in list(row.values())[0]:
-                return "Phrase already exists!"
-            elif "|" in phrase:
-                return "Invalid character in phrase!"
-            elif len(phrase) >= 35:
-                return "Phrase too long!"
-            elif len(phrase) <= 3:
-                return "Phrase too short!"
-    with open(words_to_track_file, "a") as f:
-        csvwriter = csv.DictWriter(f, fieldnames=fields, dialect='mydialect')
-        csvwriter.writerow({'phrase': phrase, 'times_said': 0})
+    data = json.load(open(words_to_track_file))
+    try:
+        cur_index = data["phrases"][-1]["uid"] + 1
+    except IndexError:
+        cur_index = 1
+    for line in data["phrases"]:
+        if phrase == line["phrase"]:
+            return "Phrase already exists!"
+        elif len(phrase) <= 3:
+            return "Phrase too short!"
+        elif len(phrase) >= 35:
+            return "Phrase too long!"
+    add_phrase = {
+        "uid": cur_index,
+        "phrase": phrase,
+        "times_said": 0,
+    }
+    with open(words_to_track_file, "w") as f:
+        data["phrases"].append(add_phrase)
+        f.write(json.dumps(data, indent=4))
         return "Phrase added!"
 
 def update_phrase(phrase):
-    file = open(words_to_track_file).readlines()
-    phrase_list = []
-    for item in file:
-        if item.split("|")[0].lower() in phrase.lower():
-            phrase_list.append(item.replace(item.split("|")[-1], str(int(item.split("|")[-1]) + 1) + "\n"))
-        else:
-            phrase_list.append(item)
+    data = json.load(open(words_to_track_file))
+    for d in data["phrases"]:
+        if d.get("phrase").lower() in phrase.lower():
+            d["times_said"] += 1
     with open(words_to_track_file, "w") as f:
-        f.writelines(phrase_list)
-    return "Updated phrase!"
+        f.write(json.dumps(data, indent=4))
+        return "Updated phrase!"
+
+def remove_phrase(phrase):
+    data = json.load(open(words_to_track_file))
+    with open(words_to_track_file, "w") as f:
+        data["phrases"] = [d for d in data["phrases"] if d.get("phrase") != phrase]
+        f.write(json.dumps(data, indent=4))
+        return "Removed phrase!"
 
 
 TOKEN = "NTIxNTUwNzIyMzU0MTE4NjY2.XqzV7Q.gvob9l9tcZe2_W_vH_54Y-shW1A"
@@ -50,17 +56,24 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
+    mapping = [("buh!help ", ""), ("buh!add_phrase ", ""), ("buh!ap ", ""), ("buh!phrases_counts ", ""), ("buh!pc ", ""), ("buh!remove_phrase ", ""), ("buh!rp ", "")]
     if "buh!help" in message.content:
         await message.channel.send("buh!add_phrase\t\tAdds phrase to count\nbuh!phrases_counts\t\tShows current phrases counts.")
         return
-    elif "buh!add_phrase" in message.content:
-        await message.channel.send(add_phrase(message.content.replace("buh!add_phrase ", "")))
+    elif any(com in message.content for com in ["buh!add_phrase", "buh!ap"]):
+        for k, v in mapping:
+            message.content = message.content.replace(k, v)
+        await message.channel.send(add_phrase(message.content))
         return
-    elif "buh!phrases_counts" == message.content:
-        phrases = open(words_to_track_file).readlines()
+    elif any(com in message.content for com in ["buh!remove_phrase", "buh!rp"]):
+        for k, v in mapping:
+            message.content = message.content.replace(k, v)
+        await message.channel.send(remove_phrase(message.content))
+    elif any(com == message.content for com in ["buh!phrases_counts", "buh!pc"]):
+        data = json.load(open(words_to_track_file))
         string_to_print = ""
-        for phrase in phrases:
-            string_to_print += f"{phrase.split('|')[0]}: {phrase.split('|')[1]}"
+        for phrase in data["phrases"]:
+            string_to_print.append(f"{phrase['phrase']}: {phrase['times_said']}")
         await message.channel.send(string_to_print)
         return
     update_phrase(message.content)
