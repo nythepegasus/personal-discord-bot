@@ -1,6 +1,7 @@
 import os
 import discord
 import json
+from phrases_module import add_phrase, update_phrase, remove_phrase
 
 words_to_track_file = "phrases.json"
 
@@ -17,6 +18,8 @@ def add_phrase(phrase):
             return "Phrase too short!"
         elif len(phrase) >= 35:
             return "Phrase too long!"
+        elif "\u0628" in phrase:
+            return "You're a cunt!"
     add_phrase = {
         "uid": cur_index,
         "phrase": phrase,
