@@ -18,6 +18,8 @@ def add_phrase(phrase):
                 return "Invalid character in phrase!"
             elif len(phrase) >= 35:
                 return "Phrase too long!"
+            elif len(phrase) <= 3:
+                return "Phrase too short!"
     with open(words_to_track_file, "a") as f:
         csvwriter = csv.DictWriter(f, fieldnames=fields, dialect='mydialect')
         csvwriter.writerow({'phrase': phrase, 'times_said': 0})
