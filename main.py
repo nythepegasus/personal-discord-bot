@@ -73,7 +73,7 @@ async def on_message(message):
         data = json.load(open(words_to_track_file))
         string_to_print = ""
         for phrase in data["phrases"]:
-            string_to_print += f"{phrase['phrase']}: {phrase['times_said']}"
+            string_to_print += f"{phrase['phrase']}: {phrase['times_said']}\n"
         await message.channel.send(string_to_print)
         return
     update_phrase(message.content)
