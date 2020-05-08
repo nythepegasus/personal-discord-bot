@@ -21,8 +21,13 @@ client = discord.Client()
 bot = commands.Bot(command_prefix="buh!")
 
 
+<<<<<<< HEAD
 @bot.command(name="add_phrase", aliases=["ap"])
 def add_phrase(ctx, phrase):
+=======
+@bot.command(aliases=["ap"])
+async def add_phrase(ctx, phrase):
+>>>>>>> 2809f878f1f31d47ac4f9ff2ca14a23ef72cd486
     data = json.load(open(words_to_track_file))
     try:
         cur_index = data["phrases"][-1]["uid"] + 1
@@ -57,8 +62,13 @@ def update_phrase(phrase):
         f.write(json.dumps(data, indent=4))
         return "Updated phrase!"
 
+<<<<<<< HEAD
 @bot.command(name="remove_phrase", aliases=["rp"])
 def remove_phrase(ctx, phrase):
+=======
+@bot.command(aliases=["rp"])
+async def remove_phrase(ctx, phrase):
+>>>>>>> 2809f878f1f31d47ac4f9ff2ca14a23ef72cd486
     data = json.load(open(words_to_track_file))
     with open(words_to_track_file, "w") as f:
         data["phrases"] = [d for d in data["phrases"] if d.get("phrase") != phrase]
