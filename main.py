@@ -21,7 +21,7 @@ TOKEN = "NTIxNTUwNzIyMzU0MTE4NjY2.XqzV7Q.gvob9l9tcZe2_W_vH_54Y-shW1A"
 client = commands.Bot(command_prefix="buh!")
 
 
-@bot.command(name="add_phrase", aliases=["ap"])
+@client.command(name="add_phrase", aliases=["ap"])
 async def add_phrase(ctx, phrase):
     data = json.load(open(words_to_track_file))
     try:
@@ -58,7 +58,7 @@ def update_phrase(phrase):
         return "Updated phrase!"
 
 
-@bot.command(name="remove_phrase", aliases=["rp"])
+@client.command(name="remove_phrase", aliases=["rp"])
 async def remove_phrase(ctx, phrase):
     data = json.load(open(words_to_track_file))
     with open(words_to_track_file, "w") as f:
@@ -66,7 +66,7 @@ async def remove_phrase(ctx, phrase):
         f.write(json.dumps(data, indent=4))
         await ctx.send("Removed phrase!")
 
-@bot.command(name="archive_pins", aliases=["arcp"])
+@client.command(name="archive_pins", aliases=["arcp"])
 async def archive_pins(ctx):
     for guild in client.guilds:
         if guild.name == "Trolls Stan Club":
@@ -127,7 +127,7 @@ async def archive_pins(ctx):
     await ctx.send(f"Archived the pins! Check them out in #{archive_channel}!")
 
 
-@bot.command(name="house_points", aliases=["hp"])
+@client.command(name="house_points", aliases=["hp"])
 async def house_points(ctx):
     data = json.load(open(words_to_track_file))
     house_emb = discord.Embed(title="House points", colour=0x00adff)
@@ -135,7 +135,7 @@ async def house_points(ctx):
         house_emb.add_field(name=house["house_name"], value=house["house_points"], inline=False)
     await ctx.send(embed=house_emb)
 
-@bot.command(name="phrase_counts", aliases=["pc"])
+@client.command(name="phrase_counts", aliases=["pc"])
 async def phrase_counts(ctx):
     data = json.load(open(words_to_track_file))
     string_to_print = ""
