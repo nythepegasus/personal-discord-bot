@@ -1,7 +1,12 @@
 import os, json, datetime, time, psutil, discord
-
+from discord.ext import commands
 
 words_to_track_file = "phrases.json"
+
+if not os.path.isfile(words_to_track_file):
+    with open(words_to_track_file, "w") as f:
+        f.write('{\n"phrases": [],\n"houses": [\n{\n"house_name": "Gryffindor",\n"house_points": 0\n},\n{\n"house_name": "Slytherin",\n"house_points": 0\n},\n{\n"house_name": "Ravenclaw",\n"house_points": 0\n},\n{\n"house_name": "Hufflepuff",\n"house_points": 0\n}\n],\n"last_pin_count": 0\n}')
+
 
 tonys_a_cunt = [
         "\u0628",
@@ -11,7 +16,13 @@ tonys_a_cunt = [
         "nigger",
 ]
 
-def add_phrase(phrase):
+TOKEN = "NTIxNTUwNzIyMzU0MTE4NjY2.XqzV7Q.gvob9l9tcZe2_W_vH_54Y-shW1A"
+client = discord.Client()
+bot = commands.Bot(command_prefix="buh!")
+
+
+@bot.command(aliases=["ap"])
+def add_phrase(ctx, phrase):
     data = json.load(open(words_to_track_file))
     try:
         cur_index = data["phrases"][-1]["uid"] + 1
@@ -34,7 +45,8 @@ def add_phrase(phrase):
     with open(words_to_track_file, "w") as f:
         data["phrases"].append(add_phrase)
         f.write(json.dumps(data, indent=4))
-        return "Phrase added!"
+        await ctx.send("Phrase added!")
+
 
 def update_phrase(phrase):
     data = json.load(open(words_to_track_file))
@@ -45,15 +57,16 @@ def update_phrase(phrase):
         f.write(json.dumps(data, indent=4))
         return "Updated phrase!"
 
-def remove_phrase(phrase):
+@bot.command(aliases=["rp"])
+def remove_phrase(ctx, phrase):
     data = json.load(open(words_to_track_file))
     with open(words_to_track_file, "w") as f:
         data["phrases"] = [d for d in data["phrases"] if d.get("phrase") != phrase]
         f.write(json.dumps(data, indent=4))
-        return "Removed phrase!"
+        await ctx.send("Removed phrase!")
 
-
-async def pin_archive():
+@bot.command(aliases=["arcp"])
+async def archive_pins(ctx):
     for guild in client.guilds:
         if guild.name == "Trolls Stan Club":
             main_guild = guild
@@ -65,7 +78,7 @@ async def pin_archive():
             archive_channel = channel
     myPins = await general_chat.pins()
     if len(myPins) == 0:
-        return "No more pins"
+        await ctx.send("No more pins")
     for pin in myPins:
         emb = discord.Embed(
             description = pin.content,
@@ -110,11 +123,24 @@ async def pin_archive():
         else:
             await archive_channel.send(embed=emb)
         await pin.unpin()
-    await general_chat.send(f"Archived the pins! Check them out in #{archive_channel}!")
+    await ctx.send(f"Archived the pins! Check them out in #{archive_channel}!")
 
 
-TOKEN = "NTIxNTUwNzIyMzU0MTE4NjY2.XqzV7Q.gvob9l9tcZe2_W_vH_54Y-shW1A"
-client = discord.Client()
+@bot.command(aliases=["hp"])
+async def house_points(ctx):
+    data = json.load(open(words_to_track_file))
+    house_emb = discord.Embed(title="House points", colour=0x00adff)
+    for house in data["houses"]:
+        house_emb.add_field(name=house["house_name"], value=house["house_points"], inline=False)
+    await ctx.send(embed=house_emb)
+
+@bot.command(aliases=["pc"])
+async def phrase_counts(ctx):
+    data = json.load(open(words_to_track_file))
+    string_to_print = ""
+    for phrase in data["phrases"]:
+        string_to_print += f"{phrase['phrase']}: {phrase['times_said']}\n"
+    await ctx.send(string_to_print)
 
 @client.event
 async def on_ready():
@@ -129,7 +155,6 @@ async def on_message(message):
         await message.delete()
         dmchannel = await message.author.create_dm()
         await dmchannel.send("You're a cunt for trying that.")
-    mapping = [("buh!help ", ""), ("buh!add_phrase ", ""), ("buh!ap ", ""), ("buh!phrases_counts ", ""), ("buh!pc ", ""), ("buh!remove_phrase ", ""), ("buh!rp ", ""), ("buh!archive_pins ", ""), ("buh!arcp ", ""), ("buh!house_points ", ""), ("buh!hp", "")]
     if "buh!help" in message.content:
         help_emb = discord.Embed(title="Bot Commands", colour=0x00adff)
         help_emb.add_field(name="buh!add_phrase | buh!ap", value="Add phrase to the tracker", inline=False)
@@ -140,32 +165,6 @@ async def on_message(message):
         help_emb.add_field(name="More to come!", value=":3", inline=False)
         help_emb.set_footer(text="Developed by Nikki")
         await message.channel.send(embed=help_emb)
-        return
-    elif any(com in message.content for com in ["buh!add_phrase", "buh!ap"]):
-        for k, v in mapping:
-            message.content = message.content.replace(k, v)
-        await message.channel.send(add_phrase(message.content))
-        return
-    elif any(com in message.content for com in ["buh!remove_phrase", "buh!rp"]):
-        for k, v in mapping:
-            message.content = message.content.replace(k, v)
-        await message.channel.send(remove_phrase(message.content))
-    elif any(com == message.content for com in ["buh!phrases_counts", "buh!pc"]):
-        data = json.load(open(words_to_track_file))
-        string_to_print = ""
-        for phrase in data["phrases"]:
-            string_to_print += f"{phrase['phrase']}: {phrase['times_said']}\n"
-        await message.channel.send(string_to_print)
-        return
-    elif any(com == message.content for com in ["buh!archive_pins", "buh!arcp"]):
-        await pin_archive()
-        return
-    elif any(com == message.content for com in ["buh!house_points", "buh!hp"]):
-        data = json.load(open(words_to_track_file))
-        house_emb = discord.Embed(title="House points", colour=0x00adff)
-        for house in data["houses"]:
-            house_emb.add_field(name=house["house_name"], value=house["house_points"], inline=False)
-        await message.channel.send(embed=house_emb)
         return
     update_phrase(message.content)
 
