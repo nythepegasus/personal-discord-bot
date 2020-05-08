@@ -22,7 +22,7 @@ bot = commands.Bot(command_prefix="buh!")
 
 
 @bot.command(aliases=["ap"])
-def add_phrase(ctx, phrase):
+async def add_phrase(ctx, phrase):
     data = json.load(open(words_to_track_file))
     try:
         cur_index = data["phrases"][-1]["uid"] + 1
@@ -58,7 +58,7 @@ def update_phrase(phrase):
         return "Updated phrase!"
 
 @bot.command(aliases=["rp"])
-def remove_phrase(ctx, phrase):
+async def remove_phrase(ctx, phrase):
     data = json.load(open(words_to_track_file))
     with open(words_to_track_file, "w") as f:
         data["phrases"] = [d for d in data["phrases"] if d.get("phrase") != phrase]
