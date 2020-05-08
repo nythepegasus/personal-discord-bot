@@ -168,6 +168,8 @@ async def on_message(message):
         await message.channel.send(embed=help_emb)
         return
     update_phrase(message.content)
+    await client.process_commands(message)
+
 
 @client.event
 async def on_guild_channel_pins_update(channel, last_pin):
