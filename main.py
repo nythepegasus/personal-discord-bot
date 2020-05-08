@@ -17,8 +17,8 @@ tonys_a_cunt = [
 ]
 
 TOKEN = "NTIxNTUwNzIyMzU0MTE4NjY2.XqzV7Q.gvob9l9tcZe2_W_vH_54Y-shW1A"
-client = discord.Client()
-bot = commands.Bot(command_prefix="buh!")
+#client = discord.Client()
+client = commands.Bot(command_prefix="buh!")
 
 
 @bot.command(name="add_phrase", aliases=["ap"])
