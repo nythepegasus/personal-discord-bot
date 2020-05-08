@@ -11,6 +11,8 @@ tonys_a_cunt = [
         "\u0628",
         "\u064d",
         "\u0631",
+        "nigga",
+        "nigger",
 ]
 
 def add_phrase(phrase):
@@ -22,7 +24,7 @@ def add_phrase(phrase):
     for line in data["phrases"]:
         if phrase == line["phrase"]:
             return "Phrase already exists!"
-        elif len(phrase) <= 3:
+        elif len(phrase) <= 2:
             return "Phrase too short!"
         elif len(phrase) >= 35:
             return "Phrase too long!"
