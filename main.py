@@ -1,9 +1,5 @@
-import os
-import discord
-import json
-import datetime
-import time
-# from phrases_module import add_phrase, update_phrase, remove_phrase
+import os, json, datetime, time, psutil, discord
+
 
 words_to_track_file = "phrases.json"
 
