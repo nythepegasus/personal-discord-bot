@@ -171,6 +171,15 @@ async def phrase_counts(ctx):
     await ctx.send(string_to_print)
 
 
+@client.command()
+async def stats(ctx):
+    stat_emb = discord.Embed(title="Discord Bot's Server Stats", colour=0x00adff)
+    stat_emb.add_field(name="Current Uptime", value=strftime("%H:%M:%S", time.gmtime(int(float(open('/proc/uptime').readline().split()[0])))))
+    stat_emb.add_field(name="RAM Usage", value=psutil.virtual_memory()[2])
+    stat_emb.add_field(name="CPU Percentage", value=psutil.cpu_percent())
+    await ctx.send(embed=stat_emb)
+
+
 """
 Starting the events, such as messages and pins.
 """
