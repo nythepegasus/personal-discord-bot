@@ -1,10 +1,17 @@
 import os, json, datetime, time, psutil, discord
 from discord.ext import commands
 
-words_to_track_file = "phrases.json"
 
-if not os.path.isfile(words_to_track_file):
-    with open(words_to_track_file, "w") as f:
+"""
+Start of the variables and such for the backend.
+"""
+
+
+db_file = "phrases.json"
+
+
+if not os.path.isfile(db_file):
+    with open(db_file, "w") as f:
         f.write('{\n"phrases": [],\n"houses": [\n{\n"house_name": "Gryffindor",\n"house_points": 0\n},\n{\n"house_name": "Slytherin",\n"house_points": 0\n},\n{\n"house_name": "Ravenclaw",\n"house_points": 0\n},\n{\n"house_name": "Hufflepuff",\n"house_points": 0\n}\n],\n"last_pin_count": 0\n}')
 
 
@@ -17,13 +24,31 @@ tonys_a_cunt = [
 ]
 
 TOKEN = "NTIxNTUwNzIyMzU0MTE4NjY2.XqzV7Q.gvob9l9tcZe2_W_vH_54Y-shW1A"
-#client = discord.Client()
 client = commands.Bot(command_prefix="buh!")
+client.remove_command("help")
+
+
+"""
+Start of the commands and functions for all the backend.
+"""
+
+
+@client.command(aliases=["h"])
+async def help(ctx):
+    help_emb = discord.Embed(title="Bot Commands", colour=0x00adff)
+    help_emb.add_field(name="buh!add_phrase | buh!ap", value="Add phrase to the tracker", inline=False)
+    help_emb.add_field(name="buh!remove_phrase | buh!rp", value="Remove phrase from the tracker", inline=False)
+    help_emb.add_field(name="buh!phrases_counts | buh!pc", value="Check phrases on the tracker", inline=False)
+    help_emb.add_field(name="buh!archive_pins | buh!arcp", value="Archive all pins from #general chat", inline=False)
+    help_emb.add_field(name="buh!house_points | buh!hp", value="Check each house's points.", inline=False)
+    help_emb.add_field(name="More to come!", value=":3", inline=False)
+    help_emb.set_footer(text="Developed by Nikki")
+    await ctx.send(embed=help_emb)
 
 
 @client.command(name="add_phrase", aliases=["ap"])
 async def add_phrase(ctx, phrase):
-    data = json.load(open(words_to_track_file))
+    data = json.load(open(db_file))
     try:
         cur_index = data["phrases"][-1]["uid"] + 1
     except IndexError:
@@ -36,35 +61,36 @@ async def add_phrase(ctx, phrase):
         elif len(phrase) >= 35:
             return "Phrase too long!"
         elif any(bad in phrase for bad in tonys_a_cunt):
-            return "You're a cunt!"
+            await ctx.send("You're a cunt!")
     add_phrase = {
         "uid": cur_index,
         "phrase": phrase,
         "times_said": 0,
     }
-    with open(words_to_track_file, "w") as f:
+    with open(db_file, "w") as f:
         data["phrases"].append(add_phrase)
         f.write(json.dumps(data, indent=4))
         await ctx.send("Phrase added!")
 
 
 def update_phrase(phrase):
-    data = json.load(open(words_to_track_file))
+    data = json.load(open(db_file))
     for d in data["phrases"]:
         if d.get("phrase").lower() in phrase.lower():
             d["times_said"] += 1
-    with open(words_to_track_file, "w") as f:
+    with open(db_file, "w") as f:
         f.write(json.dumps(data, indent=4))
         return "Updated phrase!"
 
 
 @client.command(name="remove_phrase", aliases=["rp"])
 async def remove_phrase(ctx, phrase):
-    data = json.load(open(words_to_track_file))
-    with open(words_to_track_file, "w") as f:
+    data = json.load(open(db_file))
+    with open(db_file, "w") as f:
         data["phrases"] = [d for d in data["phrases"] if d.get("phrase") != phrase]
         f.write(json.dumps(data, indent=4))
         await ctx.send("Removed phrase!")
+
 
 @client.command(name="archive_pins", aliases=["arcp"])
 async def archive_pins(ctx):
@@ -129,24 +155,32 @@ async def archive_pins(ctx):
 
 @client.command(name="house_points", aliases=["hp"])
 async def house_points(ctx):
-    data = json.load(open(words_to_track_file))
+    data = json.load(open(db_file))
     house_emb = discord.Embed(title="House points", colour=0x00adff)
     for house in data["houses"]:
         house_emb.add_field(name=house["house_name"], value=house["house_points"], inline=False)
     await ctx.send(embed=house_emb)
 
+
 @client.command(name="phrase_counts", aliases=["pc"])
 async def phrase_counts(ctx):
-    data = json.load(open(words_to_track_file))
+    data = json.load(open(db_file))
     string_to_print = ""
     for phrase in data["phrases"]:
         string_to_print += f"{phrase['phrase']}: {phrase['times_said']}\n"
     await ctx.send(string_to_print)
 
+
+"""
+Starting the events, such as messages and pins.
+"""
+
+
 @client.event
 async def on_ready():
     for guild in client.guilds:
         print(f"Tester in {guild}")
+
 
 @client.event
 async def on_message(message):
@@ -156,17 +190,6 @@ async def on_message(message):
         await message.delete()
         dmchannel = await message.author.create_dm()
         await dmchannel.send("You're a cunt for trying that.")
-    if "buh!help" in message.content:
-        help_emb = discord.Embed(title="Bot Commands", colour=0x00adff)
-        help_emb.add_field(name="buh!add_phrase | buh!ap", value="Add phrase to the tracker", inline=False)
-        help_emb.add_field(name="buh!remove_phrase | buh!rp", value="Remove phrase from the tracker", inline=False)
-        help_emb.add_field(name="buh!phrases_counts | buh!pc", value="Check phrases on the tracker", inline=False)
-        help_emb.add_field(name="buh!archive_pins | buh!arcp", value="Archive all pins from #general chat", inline=False)
-        help_emb.add_field(name="buh!house_points | buh!hp", value="Check each house's points.", inline=False)
-        help_emb.add_field(name="More to come!", value=":3", inline=False)
-        help_emb.set_footer(text="Developed by Nikki")
-        await message.channel.send(embed=help_emb)
-        return
     update_phrase(message.content)
     await client.process_commands(message)
 
@@ -175,11 +198,11 @@ async def on_message(message):
 async def on_guild_channel_pins_update(channel, last_pin):
     if channel.name != "general":
         return
-    data = json.load(open(words_to_track_file))
+    data = json.load(open(db_file))
     myPins = await channel.pins()
     if data["last_pin_count"] > len(myPins):
         data["last_pin_count"] = len(myPins)
-        with open(words_to_track_file, "w") as f:
+        with open(db_file, "w") as f:
             f.write(json.dumps(data, indent=4))
         return
     else:
@@ -192,10 +215,11 @@ async def on_guild_channel_pins_update(channel, last_pin):
                     house["house_points"] += 10
                 else:
                     pass
-            with open(words_to_track_file, "w") as f:
+            with open(db_file, "w") as f:
                 f.write(json.dumps(data, indent=4))
             await channel.send(f"10 points to {da_house}!")
         except IndexError:
             pass
+
 
 client.run(TOKEN)
