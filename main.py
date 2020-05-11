@@ -188,7 +188,7 @@ Starting the events, such as messages and pins.
 
 @client.event
 async def on_ready():
-    funny_activity = discord.CustomActivity(name="Just splishin' splashin' and frickin' around")
+    funny_activity = discord.Game(name="with my 3 inch thick yogurt slinger")
     await client.change_presence(activity=funny_activity)
     for guild in client.guilds:
         print(f"Tester in {guild}")
