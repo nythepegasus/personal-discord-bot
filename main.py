@@ -26,8 +26,7 @@ tonys_a_cunt = [
 TOKEN = "NTIxNTUwNzIyMzU0MTE4NjY2.XqzV7Q.gvob9l9tcZe2_W_vH_54Y-shW1A"
 client = commands.Bot(command_prefix="buh!")
 client.remove_command("help")
-funny_activity = discord.CustomActivity(name="Just splishin' splashin' and frickin' around")
-await client.change_presence(activity=funny_activity)
+
 
 """
 Start of the commands and functions for all the backend.
@@ -189,6 +188,8 @@ Starting the events, such as messages and pins.
 
 @client.event
 async def on_ready():
+    funny_activity = discord.CustomActivity(name="Just splishin' splashin' and frickin' around")
+    await client.change_presence(activity=funny_activity)
     for guild in client.guilds:
         print(f"Tester in {guild}")
 
