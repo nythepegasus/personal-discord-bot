@@ -185,7 +185,7 @@ async def netstats(ctx):
     data = json.load(open(db_file))
     net_message_counter = data["net_message_counter"]
     if net_message_counter >= 20:
-        async with ctx.channel.typing():
+        async with ctx.typing():
             with open(db_file, "w") as f:
                 data["net_message_counter"] = 0
                 f.write(json.dumps(data, indent=4))
