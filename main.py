@@ -1,4 +1,4 @@
-import os, json, datetime, time, psutil, discord
+import os, json, datetime, time, psutil, discord, speedtest
 from discord.ext import commands
 
 
@@ -179,6 +179,23 @@ async def stats(ctx):
     await ctx.send(embed=stat_emb)
 
 
+@client.command()
+async def netstats(ctx):
+    global net_message_counter
+    if net_message_counter >= 20:
+        global net_message_counter = 0
+        s = speedtest.Speedtest()
+        s.get_best_server()
+        s.download(threads=4)
+        s.upload(threads=4)
+        url = s.results.share()
+        net_emb = discord.Embed(title="Discord Bot's Network Speeds", colour=0x00adff)
+        net_emb.set_image(url=url)
+        await ctx.send(embed=net_emb)
+    else:
+        await ctx.send("Look man, I can't keep running that over and over again.")
+
+
 """
 Starting the events, such as messages and pins.
 """
@@ -186,6 +203,7 @@ Starting the events, such as messages and pins.
 
 @client.event
 async def on_ready():
+    global net_message_counter = 20
     funny_activity = discord.Game(name="with my 3 inch thick yogurt slinger")
     await client.change_presence(activity=funny_activity)
     for guild in client.guilds:
@@ -200,6 +218,7 @@ async def on_message(message):
         await message.delete()
         dmchannel = await message.author.create_dm()
         await dmchannel.send("You're a cunt for trying that.")
+    global net_message_counter += 1
     update_phrase(message.content)
     await client.process_commands(message)
 
