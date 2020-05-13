@@ -6,14 +6,13 @@ from discord.ext import commands
 Start of the variables and such for the backend.
 """
 
-global net_message_counter
 
 db_file = "phrases.json"
 
 
 if not os.path.isfile(db_file):
     with open(db_file, "w") as f:
-        f.write('{\n"phrases": [],\n"houses": [\n{\n"house_name": "Gryffindor",\n"house_points": 0\n},\n{\n"house_name": "Slytherin",\n"house_points": 0\n},\n{\n"house_name": "Ravenclaw",\n"house_points": 0\n},\n{\n"house_name": "Hufflepuff",\n"house_points": 0\n}\n],\n"last_pin_count": 0\n}')
+        f.write('{\n"phrases": [],\n"houses": [\n{\n"house_name": "Gryffindor",\n"house_points": 0\n},\n{\n"house_name": "Slytherin",\n"house_points": 0\n},\n{\n"house_name": "Ravenclaw",\n"house_points": 0\n},\n{\n"house_name": "Hufflepuff",\n"house_points": 0\n}\n],\n"last_pin_count": 0,\n"net_message_counter": 20}')
 
 
 tonys_a_cunt = [
@@ -43,6 +42,7 @@ async def help(ctx):
     help_emb.add_field(name="buh!archive_pins | buh!arcp", value="Archive all pins from #general chat", inline=False)
     help_emb.add_field(name="buh!house_points | buh!hp", value="Check each house's points.", inline=False)
     help_emb.add_field(name="buh!stats", value="Check the discord bot's current server stats", inline=False)
+    help_emb.add_field(name="buh!netstats", value="Check the discord bot's current net stats", inline=False)
     help_emb.add_field(name="More to come!", value=":3", inline=False)
     help_emb.set_footer(text="Developed by Nikki")
     await ctx.send(embed=help_emb)
@@ -182,10 +182,13 @@ async def stats(ctx):
 
 @client.command()
 async def netstats(ctx):
-    global net_message_counter
+    data = json.load(open(db_file))
+    net_message_counter = data["net_message_counter"]
     if net_message_counter >= 20:
         async with ctx.channel.typing():
-            net_message_counter = 0
+            with open(db_file, "w") as f:
+                data["net_message_counter"] = 0
+                f.write(json.dumps(data, indent=4))
             s = speedtest.Speedtest()
             s.get_best_server()
             s.download(threads=4)
@@ -205,8 +208,6 @@ Starting the events, such as messages and pins.
 
 @client.event
 async def on_ready():
-    global net_message_counter
-    net_message_counter = 20
     funny_activity = discord.Game(name="with my 3 inch thick yogurt slinger")
     await client.change_presence(activity=funny_activity)
     for guild in client.guilds:
@@ -221,9 +222,10 @@ async def on_message(message):
         await message.delete()
         dmchannel = await message.author.create_dm()
         await dmchannel.send("You're a cunt for trying that.")
-    global net_message_counter
-    net_message_counter += 1
-    print(net_message_counter)
+    data = json.load(open(db_file))
+    with open(db_file, "w") as f:
+        data["net_message_counter"] += 1
+        f.write(json.dumps(data, indent=4))
     update_phrase(message.content)
     await client.process_commands(message)
 
