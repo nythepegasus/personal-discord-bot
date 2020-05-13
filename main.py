@@ -6,6 +6,7 @@ from discord.ext import commands
 Start of the variables and such for the backend.
 """
 
+global net_message_counter
 
 db_file = "phrases.json"
 
@@ -183,7 +184,7 @@ async def stats(ctx):
 async def netstats(ctx):
     global net_message_counter
     if net_message_counter >= 20:
-        global net_message_counter = 0
+        net_message_counter = 0
         s = speedtest.Speedtest()
         s.get_best_server()
         s.download(threads=4)
@@ -203,7 +204,8 @@ Starting the events, such as messages and pins.
 
 @client.event
 async def on_ready():
-    global net_message_counter = 20
+    global net_message_counter
+    net_message_counter = 20
     funny_activity = discord.Game(name="with my 3 inch thick yogurt slinger")
     await client.change_presence(activity=funny_activity)
     for guild in client.guilds:
