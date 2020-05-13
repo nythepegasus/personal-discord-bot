@@ -231,6 +231,52 @@ async def on_message(message):
 
 
 @client.event
+async def on_message_delete(message):
+    user = client.get_user(195864152856723456)
+    emb = discord.Embed(
+        description = message.content,
+        timestamp = datetime.datetime.utcfromtimestamp(int(time.time())),
+    )
+    emb.set_author(
+        name=message.author,
+        icon_url=message.author.avatar_url,
+        url="https://discordapp.com/channels/{0}/{1}/{2}".format(
+            message.guild.id, message.channel.id, message.id)
+    )
+    if message.attachments:
+        if len(message.attachments) > 1:
+            img_url = message.attachments[0].url
+            emb.set_image(url=img_url)
+            emb.set_footer(text=f"Part 1 | Archived from #{message.channel}")
+            await user.send(embed=emb)
+            attach_counter = 1
+            try:
+                for attachment in message.attachments:
+                    next_emb = discord.Embed(
+                        timestamp = datetime.datetime.utcfromtimestamp(int(time.time())),
+                    )
+                    next_emb.set_author(
+                    name=message.author,
+                    icon_url=message.author.avatar_url,
+                    url="https://discordapp.com/channels/{0}/{1}/{2}".format(
+                        message.guild.id, message.channel.id, message.id)
+                    )
+                    img_url = message.attachments[attach_counter].url
+                    next_emb.set_image(url=img_url)
+                    next_emb.set_footer(text=f"Part {attach_counter+1} | Deleted from #{message.channel}")
+                    attach_counter += 1
+                    await user.send(embed=next_emb)
+            except IndexError:
+                pass
+        elif len(message.attachments) == 1:
+            img_url = message.attachments[0].url
+            emb.set_image(url=img_url)
+            emb.set_footer(text=f"Deleted from #{message.channel}")
+            await user.send(embed=emb)
+    else:
+        await user.send(embed=emb)
+
+@client.event
 async def on_guild_channel_pins_update(channel, last_pin):
     if channel.name != "general":
         return
