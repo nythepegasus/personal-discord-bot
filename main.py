@@ -184,15 +184,16 @@ async def stats(ctx):
 async def netstats(ctx):
     global net_message_counter
     if net_message_counter >= 20:
-        net_message_counter = 0
-        s = speedtest.Speedtest()
-        s.get_best_server()
-        s.download(threads=4)
-        s.upload(threads=4)
-        url = s.results.share()
-        net_emb = discord.Embed(title="Discord Bot's Network Speeds", colour=0x00adff)
-        net_emb.set_image(url=url)
-        await ctx.send(embed=net_emb)
+        async with ctx.channel.typing():
+            net_message_counter = 0
+            s = speedtest.Speedtest()
+            s.get_best_server()
+            s.download(threads=4)
+            s.upload(threads=4)
+            url = s.results.share()
+            net_emb = discord.Embed(title="Discord Bot's Network Speeds", colour=0x00adff)
+            net_emb.set_image(url=url)
+            await ctx.send(embed=net_emb)
     else:
         await ctx.send("Look man, I can't keep running that over and over again.")
 
