@@ -95,9 +95,7 @@ async def remove_phrase(ctx, phrase):
 
 @client.command(name="archive_pins", aliases=["arcp"])
 async def archive_pins(ctx):
-    for guild in client.guilds:
-        if guild.name == "Trolls Stan Club":
-            main_guild = guild
+    guild = client.guilds[0]
     for channel in main_guild.channels:
         if channel.name == "general":
             general_chat = channel
