@@ -220,7 +220,8 @@ async def on_message(message):
         await message.delete()
         dmchannel = await message.author.create_dm()
         await dmchannel.send("You're a cunt for trying that.")
-    global net_message_counter += 1
+    global net_message_counter
+    net_message_counter += 1
     update_phrase(message.content)
     await client.process_commands(message)
 
