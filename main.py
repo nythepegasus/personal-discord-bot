@@ -1,4 +1,4 @@
-import os, json, datetime, time, psutil, discord, speedtest
+import os, json, datetime, time, psutil, discord, speedtest, subprocess
 from discord.ext import commands
 
 
@@ -173,10 +173,15 @@ async def phrase_counts(ctx):
 
 @client.command()
 async def stats(ctx):
+    uptime = subprocess.run("uptime", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    days = int(uptime.stdout.split()[2])
+    hours = str(int(uptime.stdout.split()[4].strip(b",").split(b":")[0])).zfill(2)
+    minutes = str(int(uptime.stdout.split()[4].strip(b",").split(b":")[1])).zfill(2)
     stat_emb = discord.Embed(title="Discord Bot's Server Stats", colour=0x00adff)
-    stat_emb.add_field(name="Current Uptime", value=time.strftime("%H:%M:%S", time.gmtime(int(float(open('/proc/uptime').readline().split()[0])))))
+    stat_emb.add_field(name="Current Uptime", value=f"{days}:{hours}:{minutes}")
     stat_emb.add_field(name="RAM Percentage", value=psutil.virtual_memory()[2])
     stat_emb.add_field(name="CPU Percentage", value=psutil.cpu_percent())
+    stat_emb.set_footer(text="Proudly fixed with nano.")
     await ctx.send(embed=stat_emb)
 
 
