@@ -185,7 +185,7 @@ async def stats(ctx):
     await ctx.send(embed=stat_emb)
 
 
-@commands.cooldown(1, 120, command.BucketType.default)
+@commands.cooldown(1, 120, command.BucketType.role)
 @client.command()
 async def netstats(ctx):
     if net_message_counter >= 20:
