@@ -57,13 +57,17 @@ async def add_phrase(ctx, phrase):
         cur_index = 1
     for line in data["phrases"]:
         if phrase == line["phrase"]:
-            return "Phrase already exists!"
+            ctx.send("Phrase already exists!")
+            return
         elif len(phrase) <= 2:
-            return "Phrase too short!"
+            ctx.send("Phrase too short!")
+            return
         elif len(phrase) >= 35:
-            return "Phrase too long!"
+            ctx.send("Phrase too long!")
+            return
         elif any(bad in phrase for bad in tonys_a_cunt):
             await ctx.send("You're a cunt!")
+            return
     add_phrase = {
         "uid": cur_index,
         "phrase": phrase,
@@ -185,24 +189,21 @@ async def stats(ctx):
     await ctx.send(embed=stat_emb)
 
 
-@commands.cooldown(1, 120, command.BucketType.role)
+@commands.cooldown(1, 120, commands.BucketType.user)
 @client.command()
 async def netstats(ctx):
-    if net_message_counter >= 20:
-        async with ctx.typing():
-            s = speedtest.Speedtest()
-            s.get_best_server()
-            s.download(threads=4)
-            s.upload(threads=4)
-            url = s.results.share()
-            net_emb = discord.Embed(title="Discord Bot's Network Speeds", colour=0x00adff)
-            net_emb.set_image(url=url)
-            await ctx.send(embed=net_emb)
-    else:
-        await ctx.send("Look man, I can't keep running that over and over again.")
+    async with ctx.typing():
+        s = speedtest.Speedtest()
+        s.get_best_server()
+        s.download(threads=4)
+        s.upload(threads=4)
+        url = s.results.share()
+        net_emb = discord.Embed(title="Discord Bot's Network Speeds", colour=0x00adff)
+        net_emb.set_image(url=url)
+        await ctx.send(embed=net_emb)
 
 
-@commands.cooldown(1, 90, command.BucketType.default)
+@commands.cooldown(1, 90, commands.BucketType.user)
 @client.command(aliases=["cs"])
 async def cast_spell(ctx):
     data = json.load(open(db_file))
@@ -212,10 +213,35 @@ async def cast_spell(ctx):
             if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
                 da_house = house["house_name"]
                 points_awarded = random.randint(3,10)
+                points_reducted = points_awarded
                 house["house_points"] += points_awarded
                 with open(db_file, "w") as f:
                     f.write(json.dumps(data, indent=4))
-                await ctx.send(f"{points_awarded} points to {da_house}!")
+
+                random_phrases_points_awarded = [
+                    f"You handled your rod quite well!\n{points_awarded} points awarded to {da_house}!",
+                    f"You sucked Umbridge's toes in whatever fucking class that bitch teaches.\n{da_house} gets {points_awarded} points, you fucking simp.",
+                    f"You found a chocolate frog.\n{points_awarded} points awarded to {da_house}!",
+                    f"You scored a banger goal in a Quidditch match and made the losing team cry like a bitch from your thick cock.\n{points_awarded} points to {da_house}!",
+                    f"Moaning Myrtle saw your bomb ass cock.\n{points_awarded} points to {da_house} for pimpin' the ghost bitch.",
+                    f"Your love potion turned out too well, now Snape's riding your cock.\n{points_awarded} points to {da_house}!",
+                    f"You found Hagrid's secret stash of Hermione's nudes. (Don't tell anyone)\n{da_house} earns {points_awarded}! (As long as you keep quiet, you lil fuck)",
+                    f"You smacked your prefect's ass for doing a good job. He gives you a thumbs up, smacks your ass, and winks at you.\n{points_awarded} points for {da_house}. (Someone's getting lucky tonight ;))",
+                    f"You called Ron a ginger virgin, and everyone laughed (r/thathappened). Fuck you, Ron.\n{points_awarded} points for {da_house}.",
+                    f"You got the mandrake to shut the fuck up (thank fuck).\n{points_awarded} points for {da_house}, you hero.",
+                    f"Nearly Headless Nick nearly gave you head.\n{da_house} gets {points_awarded} points, since your a sick fuck who likes the quick fuck",
+                ]
+                random_phrases_points_reducted = [
+                    f"You angered Snape in potions class.\n{points_reducted} points taken from {da_house}.",
+                    f"You pronounced a spell wrong, it's pronounced levi*o*sa.\n{points_reducted} points taken from {da_house}.",
+                    f"You fell up the stairs, you fucking idiot.\n{points_reducted} points taken from {da_house}.",
+                    f"You fell down 10 flights on the Grand Staircase and broke 24 bones and are now hospitalized for a week.\n\nOh, and {da_house} loses {points_reducted} points. Nice goin'",
+                    f"Voldemort smote the school because you made fun of his not nose. Way to go, dickhead.\n{da_house} loses {points_reducted} points. (You should feel bad, sick fuck).",
+                    f"You got wasted on nonalcoholic butterbeer like an underaged cuck, and started a petty brawl.\n{points_reducted} points from {da_house}.",
+                    f"You creeped out Hagrid with your weird ass fanfiction about his giant furcock.\n{da_house} loses {points_reducted} points.",
+                    f"You let the Cornish Pixies escape from their cage and they wreaked havoc around the school. Good job, dumbass.\n{da_house} loses {points_reducted} points because of your dumbassery.",
+                ]
+                await ctx.send(random.choice(random_phrases_points_awarded))
             else:
                 pass
     else:
@@ -223,10 +249,42 @@ async def cast_spell(ctx):
             if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
                 da_house = house["house_name"]
                 points_reducted = random.randint(3,10)
+                points_awarded = points_reducted
                 house["house_points"] -= points_reducted
                 with open(db_file, "w") as f:
                     f.write(json.dumps(data, indent=4))
-                await ctx.send(f"{da_house} lost {points_reducted} points!")
+
+                random_phrases_points_awarded = [
+                    f"You handled your rod quite well!\n{points_awarded} points awarded to {da_house}!",
+                    f"You sucked Umbridge's toes in whatever fucking class that bitch teaches.\n{da_house} gets {points_awarded} points, you fucking simp.",
+                    f"You found a chocolate frog.\n{points_awarded} points awarded to {da_house}!",
+                    f"You scored a banger goal in a Quidditch match and made the losing team cry like a bitch from your thick cock.\n{points_awarded} points to {da_house}!",
+                    f"Moaning Myrtle saw your bomb ass cock.\n{points_awarded} points to {da_house} for pimpin' the ghost bitch.",
+                    f"Your love potion turned out too well, now Snape's riding your cock.\n{points_awarded} points to {da_house}!",
+                    f"You found Hagrid's secret stash of Hermione's nudes. (Don't tell anyone)\n{da_house} earns {points_awarded}! (As long as you keep quiet, you lil fuck)",
+                    f"You smacked your prefect's ass for doing a good job. He gives you a thumbs up, smacks your ass, and winks at you.\n{points_awarded} points for {da_house}. (Someone's getting lucky tonight ;))",
+                    f"You called Ron a ginger virgin, and everyone laughed (r/thathappened). Fuck you, Ron.\n{points_awarded} points for {da_house}.",
+                    f"You got the mandrake to shut the fuck up (thank fuck).\n{points_awarded} points for {da_house}, you hero.",
+                    f"Nearly Headless Nick nearly gave you head.\n{da_house} gets {points_awarded} points, since your a sick fuck who likes the quick fuck",
+                ]
+                random_phrases_points_reducted = [
+                    f"You angered Snape in potions class.\n{points_reducted} points taken from {da_house}.",
+                    f"You pronounced a spell wrong, it's pronounced levi*o*sa.\n{points_reducted} points taken from {da_house}.",
+                    f"You fell up the stairs, you fucking idiot.\n{points_reducted} points taken from {da_house}.",
+                    f"You fell down 10 flights on the Grand Staircase and broke 24 bones and are now hospitalized for a week.\n\nOh, and {da_house} loses {points_reducted} points. Nice goin'",
+                    f"Voldemort smote the school because you made fun of his not nose. Way to go, dickhead.\n{da_house} loses {points_reducted} points. (You should feel bad, sick fuck).",
+                    f"You got wasted on nonalcoholic butterbeer like an underaged cuck, and started a petty brawl.\n{points_reducted} points from {da_house}.",
+                    f"You creeped out Hagrid with your weird ass fanfiction about his giant furcock.\n{da_house} loses {points_reducted} points.",
+                    f"You let the Cornish Pixies escape from their cage and they wreaked havoc around the school. Good job, dumbass.\n{da_house} loses {points_reducted} points because of your dumbassery.",
+                ]
+                await ctx.send(random.choice(random_phrases_points_reducted))
+
+@cast_spell.error
+async def cast_spell_erorr(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send(f"You gotta wait {round(error.retry_after, 2)} seconds to try again")
+    else:
+        raise error
 
 
 """
@@ -251,10 +309,6 @@ async def on_message(message):
         dmchannel = await message.author.create_dm()
         await dmchannel.send("You're a cunt for trying that.")
         return
-    data = json.load(open(db_file))
-    with open(db_file, "w") as f:
-        data["net_message_counter"] += 1
-        f.write(json.dumps(data, indent=4))
     update_phrase(message.content)
     await client.process_commands(message)
 
