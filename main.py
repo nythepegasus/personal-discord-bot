@@ -227,6 +227,7 @@ async def on_message(message):
         await message.delete()
         dmchannel = await message.author.create_dm()
         await dmchannel.send("You're a cunt for trying that.")
+        return
     data = json.load(open(db_file))
     with open(db_file, "w") as f:
         data["net_message_counter"] += 1
