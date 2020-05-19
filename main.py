@@ -41,6 +41,7 @@ async def help(ctx):
     help_emb.add_field(name="buh!phrases_counts | buh!pc", value="Check phrases on the tracker", inline=False)
     help_emb.add_field(name="buh!archive_pins | buh!arcp", value="Archive all pins from #general chat", inline=False)
     help_emb.add_field(name="buh!house_points | buh!hp", value="Check each house's points.", inline=False)
+    help_emb.add_field(name="buh!cast_spell | buh!cs", value="Gamble your house's points away, and see where fate takes you.", inline=False)
     help_emb.add_field(name="buh!stats", value="Check the discord bot's current server stats", inline=False)
     help_emb.add_field(name="buh!netstats", value="Check the discord bot's current net stats", inline=False)
     help_emb.add_field(name="More to come!", value=":3", inline=False)
