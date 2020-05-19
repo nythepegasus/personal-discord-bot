@@ -1,4 +1,4 @@
-import os, json, datetime, time, psutil, discord, speedtest, subprocess
+import os, json, datetime, time, psutil, discord, speedtest, subprocess, random
 from discord.ext import commands
 
 
@@ -185,15 +185,11 @@ async def stats(ctx):
     await ctx.send(embed=stat_emb)
 
 
+@commands.cooldown(1, 120, command.BucketType.default)
 @client.command()
 async def netstats(ctx):
-    data = json.load(open(db_file))
-    net_message_counter = data["net_message_counter"]
     if net_message_counter >= 20:
         async with ctx.typing():
-            with open(db_file, "w") as f:
-                data["net_message_counter"] = 0
-                f.write(json.dumps(data, indent=4))
             s = speedtest.Speedtest()
             s.get_best_server()
             s.download(threads=4)
@@ -204,6 +200,33 @@ async def netstats(ctx):
             await ctx.send(embed=net_emb)
     else:
         await ctx.send("Look man, I can't keep running that over and over again.")
+
+
+@commands.cooldown(1, 90, command.BucketType.default)
+@client.command(aliases=["cs"])
+async def cast_spell(ctx):
+    data = json.load(open(db_file))
+    num = random.randint(1,10)
+    if num >= 6:
+        for house in data["houses"]:
+            if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
+                da_house = house["house_name"]
+                points_awarded = random.randint(3,10)
+                house["house_points"] += points_awarded
+                with open(db_file, "w") as f:
+                    f.write(json.dumps(data, indent=4))
+                await ctx.send(f"{points_awarded} points to {da_house}!")
+            else:
+                pass
+    else:
+        for house in data["houses"]:
+            if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
+                da_house = house["house_name"]
+                points_reducted = random.randint(3,10)
+                house["house_points"] -= points_reducted
+                with open(db_file, "w") as f:
+                    f.write(json.dumps(data, indent=4))
+                await ctx.send(f"{da_house} lost {points_reducted} points!")
 
 
 """
@@ -300,7 +323,7 @@ async def on_guild_channel_pins_update(channel, last_pin):
             for house in data["houses"]:
                 if house["house_name"].lower() in [y.name.lower() for y in latestPin.author.roles]:
                     da_house = house["house_name"]
-                    house["house_points"] += 10
+                    house["house_points"] += 50
                 else:
                     pass
             with open(db_file, "w") as f:
