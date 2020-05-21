@@ -204,21 +204,35 @@ async def netstats(ctx):
         await ctx.send(embed=net_emb)
 
 
-@commands.cooldown(1, 90, commands.BucketType.user)
+@cast_spell.error
+async def netstats_error(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send(f"Wait {round(error.retry_after, 2)} more seconds.")
+    else:
+        raise error
+
+
+@commands.cooldown(1, 180, commands.BucketType.user)
 @client.command(aliases=["cs"])
 async def cast_spell(ctx):
     data = json.load(open(db_file))
-    num = random.randint(1,10)
-    if num >= 6:
-        for house in data["houses"]:
-            if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
-                da_house = house["house_name"]
-                points_awarded = random.randint(3,10)
-                points_reducted = points_awarded
+    if random.randint(1, 10) >= 6:
+        if random.randint(1, 10) >= 8:
+            points_awarded = random.randint(10, 20)
+        else:
+            points_awarded = random.randint(3, 10)
+    else:
+        if random.randint(1, 10) <= 8:
+            points_reducted = random.randint(3, 10)
+        else:
+            points_reducted = random.randint(20, 25)
+    for house in data["houses"]:
+        if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
+            da_house = house["house_name"]
+            try:
                 house["house_points"] += points_awarded
                 with open(db_file, "w") as f:
                     f.write(json.dumps(data, indent=4))
-
                 random_phrases_points_awarded = [
                     f"You handled your rod quite well!\n{points_awarded} points awarded to {da_house}!",
                     f"You sucked Umbridge's toes in whatever fucking class that bitch teaches.\n{da_house} gets {points_awarded} points, you fucking simp.",
@@ -230,60 +244,67 @@ async def cast_spell(ctx):
                     f"You smacked your prefect's ass for doing a good job. He gives you a thumbs up, smacks your ass, and winks at you.\n{points_awarded} points for {da_house}. (Someone's getting lucky tonight ;))",
                     f"You called Ron a ginger virgin, and everyone laughed (r/thathappened). Fuck you, Ron.\n{points_awarded} points for {da_house}.",
                     f"You got the mandrake to shut the fuck up (thank fuck).\n{points_awarded} points for {da_house}, you hero.",
-                    f"Nearly Headless Nick nearly gave you head.\n{da_house} gets {points_awarded} points, since your a sick fuck who likes the quick fuck",
-                ]
-                random_phrases_points_reducted = [
-                    f"You angered Snape in potions class.\n{points_reducted} points taken from {da_house}.",
-                    f"You pronounced a spell wrong, it's pronounced levi*o*sa.\n{points_reducted} points taken from {da_house}.",
-                    f"You fell up the stairs, you fucking idiot.\n{points_reducted} points taken from {da_house}.",
-                    f"You fell down 10 flights on the Grand Staircase and broke 24 bones and are now hospitalized for a week.\n\nOh, and {da_house} loses {points_reducted} points. Nice goin'",
-                    f"Voldemort smote the school because you made fun of his not nose. Way to go, dickhead.\n{da_house} loses {points_reducted} points. (You should feel bad, sick fuck).",
-                    f"You got wasted on nonalcoholic butterbeer like an underaged cuck, and started a petty brawl.\n{points_reducted} points from {da_house}.",
-                    f"You creeped out Hagrid with your weird ass fanfiction about his giant furcock.\n{da_house} loses {points_reducted} points.",
-                    f"You let the Cornish Pixies escape from their cage and they wreaked havoc around the school. Good job, dumbass.\n{da_house} loses {points_reducted} points because of your dumbassery.",
+                    f"Nearly Headless Nick nearly gave you head.\n{da_house} gets {points_awarded} points, since you're a sick fuck who likes the quick fuck",
                 ]
                 await ctx.send(random.choice(random_phrases_points_awarded))
-            else:
-                pass
-    else:
-        for house in data["houses"]:
-            if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
-                da_house = house["house_name"]
-                points_reducted = random.randint(3,10)
-                points_awarded = points_reducted
-                house["house_points"] -= points_reducted
-                with open(db_file, "w") as f:
-                    f.write(json.dumps(data, indent=4))
+            except NameError:
+                try:
+                    house["house_points"] -= points_reducted
+                    with open(db_file, "w") as f:
+                        f.write(json.dumps(data, indent=4))
+                    random_phrases_points_reducted = [
+                        f"You angered Snape in potions class.\n{points_reducted} points taken from {da_house}.",
+                        f"You pronounced a spell wrong, it's pronounced levi*o*sa.\n{points_reducted} points taken from {da_house}.",
+                        f"You fell up the stairs, you fucking idiot.\n{points_reducted} points taken from {da_house}.",
+                        f"You fell down 10 flights on the Grand Staircase and broke 24 bones and are now hospitalized for a week.\n\nOh, and {da_house} loses {points_reducted} points. Nice goin'",
+                        f"Voldemort smote the school because you made fun of his not nose. Way to go, dickhead.\n{da_house} loses {points_reducted} points. (You should feel bad, sick fuck).",
+                        f"You got wasted on nonalcoholic butterbeer like an underaged cuck, and started a petty brawl.\n{points_reducted} points from {da_house}.",
+                        f"You creeped out Hagrid with your weird ass fanfiction about his giant furcock.\n{da_house} loses {points_reducted} points.",
+                        f"You let the Cornish Pixies escape from their cage and they wreaked havoc around the school. Good job, dumbass.\n{da_house} loses {points_reducted} points because of your dumbassery.",
+                    ]
+                    await ctx.send(random.choice(random_phrases_points_reducted))
+                except NameError:
+                    await ctx.send("Something went terribly, terribly wrong. Please tell <@195864152856723456> to fix his jank shit.")
+        else:
+            pass
 
-                random_phrases_points_awarded = [
-                    f"You handled your rod quite well!\n{points_awarded} points awarded to {da_house}!",
-                    f"You sucked Umbridge's toes in whatever fucking class that bitch teaches.\n{da_house} gets {points_awarded} points, you fucking simp.",
-                    f"You found a chocolate frog.\n{points_awarded} points awarded to {da_house}!",
-                    f"You scored a banger goal in a Quidditch match and made the losing team cry like a bitch from your thick cock.\n{points_awarded} points to {da_house}!",
-                    f"Moaning Myrtle saw your bomb ass cock.\n{points_awarded} points to {da_house} for pimpin' the ghost bitch.",
-                    f"Your love potion turned out too well, now Snape's riding your cock.\n{points_awarded} points to {da_house}!",
-                    f"You found Hagrid's secret stash of Hermione's nudes. (Don't tell anyone)\n{da_house} earns {points_awarded}! (As long as you keep quiet, you lil fuck)",
-                    f"You smacked your prefect's ass for doing a good job. He gives you a thumbs up, smacks your ass, and winks at you.\n{points_awarded} points for {da_house}. (Someone's getting lucky tonight ;))",
-                    f"You called Ron a ginger virgin, and everyone laughed (r/thathappened). Fuck you, Ron.\n{points_awarded} points for {da_house}.",
-                    f"You got the mandrake to shut the fuck up (thank fuck).\n{points_awarded} points for {da_house}, you hero.",
-                    f"Nearly Headless Nick nearly gave you head.\n{da_house} gets {points_awarded} points, since your a sick fuck who likes the quick fuck",
-                ]
-                random_phrases_points_reducted = [
-                    f"You angered Snape in potions class.\n{points_reducted} points taken from {da_house}.",
-                    f"You pronounced a spell wrong, it's pronounced levi*o*sa.\n{points_reducted} points taken from {da_house}.",
-                    f"You fell up the stairs, you fucking idiot.\n{points_reducted} points taken from {da_house}.",
-                    f"You fell down 10 flights on the Grand Staircase and broke 24 bones and are now hospitalized for a week.\n\nOh, and {da_house} loses {points_reducted} points. Nice goin'",
-                    f"Voldemort smote the school because you made fun of his not nose. Way to go, dickhead.\n{da_house} loses {points_reducted} points. (You should feel bad, sick fuck).",
-                    f"You got wasted on nonalcoholic butterbeer like an underaged cuck, and started a petty brawl.\n{points_reducted} points from {da_house}.",
-                    f"You creeped out Hagrid with your weird ass fanfiction about his giant furcock.\n{da_house} loses {points_reducted} points.",
-                    f"You let the Cornish Pixies escape from their cage and they wreaked havoc around the school. Good job, dumbass.\n{da_house} loses {points_reducted} points because of your dumbassery.",
-                ]
-                await ctx.send(random.choice(random_phrases_points_reducted))
 
 @cast_spell.error
 async def cast_spell_erorr(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
-        await ctx.send(f"You gotta wait {round(error.retry_after, 2)} seconds to try again")
+        await ctx.send(f"You're a little tired from your last fiasco. Wait {round(error.retry_after, 2)} seconds to try again.")
+    else:
+        raise error
+
+
+@commands.cooldown(1, 86400, commands.BucketType.user)
+@client.command()
+async def beg(ctx):
+    await ctx.send("You hear a zip sound come from under Dumbledore's robes..")
+    data = json.load(open(db_file))
+    if random.randint(1, 10) >= 5:
+        points_awarded = random.randint(40, 70)
+        big_award = True
+    else:
+        points_awarded = random.randint(25, 35)
+    for house in data["houses"]:
+        if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
+            da_house = house["house_name"]
+            house["house_points"] += points_awarded
+            with open(db_file, "w") as f:
+                f.write(json.dumps(data, indent=4))
+        else:
+            pass
+    if big_award:
+        await ctx.send(f"Dumbledore seems very pleased with how you sucked his cock.\n{da_house} earns {points_awarded} points for your awesome head skills!")
+    else:
+        await ctx.send(f"Dumbledore is somewhat okay with how you gave head. Just uh, use less teeth next time, got it?\n{points_awarded} points to {da_house}.")
+
+
+@beg.error
+async def beg_error(ctx, error):
+    if isinstance(error, commands.CommandOnCool):
+        await ctx.send(f"Dumbledore's cock has had enough of your mouth. Please wait {str(datetime.timedelta(seconds=error.retry_after)).split(":")[0]} hours and {str(datetime.timedelta(seconds=error.retry_after)).split(":")[1]} minutes.")
     else:
         raise error
 
