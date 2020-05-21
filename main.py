@@ -204,7 +204,7 @@ async def netstats(ctx):
         await ctx.send(embed=net_emb)
 
 
-@cast_spell.error
+@netstats.error
 async def netstats_error(ctx, error):
     if isinstance(error, commands.CommandOnCooldown):
         await ctx.send(f"Wait {round(error.retry_after, 2)} more seconds.")
