@@ -304,7 +304,7 @@ async def beg(ctx):
 @beg.error
 async def beg_error(ctx, error):
     if isinstance(error, commands.CommandOnCool):
-        await ctx.send(f"Dumbledore's cock has had enough of your mouth. Please wait {str(datetime.timedelta(seconds=error.retry_after)).split(":")[0]} hours and {str(datetime.timedelta(seconds=error.retry_after)).split(":")[1]} minutes.")
+        await ctx.send(f'Dumbledore\'s cock has had enough of your mouth. Please wait {str(datetime.timedelta(seconds=error.retry_after)).split(":")[0]} hours and {str(datetime.timedelta(seconds=error.retry_after)).split(":")[1]} minutes.')
     else:
         raise error
 
