@@ -12,7 +12,7 @@ db_file = "phrases.json"
 
 if not os.path.isfile(db_file):
     with open(db_file, "w") as f:
-        f.write('{\n"phrases": [],\n"houses": [\n{\n"house_name": "Gryffindor",\n"house_points": 0\n},\n{\n"house_name": "Slytherin",\n"house_points": 0\n},\n{\n"house_name": "Ravenclaw",\n"house_points": 0\n},\n{\n"house_name": "Hufflepuff",\n"house_points": 0\n}\n],\n"last_pin_count": 0,\n"net_message_counter": 20}')
+        f.write('{\n"phrases": [],\n"houses": [\n{\n"house_name": "Gryffindor",\n"house_points": 0\n},\n{\n"house_name": "Slytherin",\n"house_points": 0\n},\n{\n"house_name": "Ravenclaw",\n"house_points": 0\n},\n{\n"house_name": "Hufflepuff",\n"house_points": 0\n}\n],\n"last_pin_count": 0,\n"timeouts": []}')
 
 
 tonys_a_cunt = [
@@ -277,6 +277,46 @@ async def cast_spell_erorr(ctx, error):
         raise error
 
 
+@commands.cooldown(1, 600, commands.BucketType.user)
+@client.command()
+async def steal(ctx):
+    data = json.load(open(db_file))
+    houses_steal_from = data["houses"].copy()
+    for house in houses_steal_from:
+        if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
+            stealer = houses_steal_from.pop(houses_steal_from.index(house))
+    for house in houses_steal_from:
+        if house["house_name"] in ctx.message:
+            stolen_from = house
+    if random.randint(1, 10) >= 7:
+        if random.randint(1, 10) >= 8:
+            amount_stolen = random.randint(20, 30)
+        else:
+            amount_stolen = random.randint(5, 15)
+        stolen_from["house_points"] -= amount_stolen
+        stealer["house_points"] += amount_stolen
+        ctx.send(f'Your prefect found members of {stolen_from["house_name"]} fucking in the halls late at night.\nYour house stole {amount_stolen} points from their house!')
+        json.dump(data, open(db_file, "w"))
+        return
+    else:
+        amount_lost = random.randint(6, 16)
+        if random.randint(1,10) <= 4:
+            amount_lost = random.randint(25, 35)
+        stolen_from["house_points"] += amount_lost
+        stealer["house_points"] -= amount_lost
+        ctx.send(f'{stolen_from["house_name"]}\'s prefect found you bumbling about trying to spy on them. Your house gave them {amount_lost} points.')
+        json.dump(data, open(db_file, "w"))
+        return
+
+
+@steal.error
+async def steal_erorr(ctx, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await ctx.send(f"You're a little tired from your last fiasco. Wait {round(error.retry_after, 2)} seconds to try again.")
+    else:
+        raise error
+
+
 @client.command()
 async def beg(ctx):
     data = json.load(open(db_file))
@@ -310,14 +350,6 @@ async def beg(ctx):
         await ctx.send(f"Dumbledore seems very pleased with how you sucked his cock.\n{da_house} earns {points_awarded} points for your awesome head skills!")
     else:
         await ctx.send(f"Dumbledore is somewhat okay with how you gave head. Just uh, use less teeth next time, got it?\n{points_awarded} points to {da_house}.")
-
-
-@beg.error
-async def beg_error(ctx, error):
-    if isinstance(error, commands.CommandOnCooldown):
-        await ctx.send(f'Dumbledore\'s cock has had enough of your mouth. Please wait {str(datetime.timedelta(seconds=error.retry_after)).split(":")[0]} hours and {str(datetime.timedelta(seconds=error.retry_after)).split(":")[1]} minutes.')
-    else:
-        raise error
 
 
 """
