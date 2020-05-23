@@ -376,22 +376,14 @@ async def on_message(message):
         return
     if message.content == "" and len(message.attachments) == 0 and message.channel.name == "general":
         data = json.load(open(db_file))
-        async for i in message.channel.history(limit=1):
-            print(i.author)
-            print(i.author.roles)
         myPins = await message.channel.pins()
-        print(myPins[0].author.roles)
         for house in data["houses"]:
             if house["house_name"].lower() in [y.name.lower() for y in message.author.roles]:
-                print("Found house!")
                 da_house = house["house_name"]
-                print(da_house)
                 if da_house.lower() not in [y.name.lower() for y in myPins[0].author.roles]:
-                    print("Houses no match")
                     house["house_points"] += 30
-                    message.channel.send(f"30 points to {da_house}, for pinning the message.")
+                    await message.channel.send(f"30 points to {da_house}, for pinning the message.")
                 else:
-                    print("Houses match")
                     pass
         json.dump(data, open(db_file, "w"))
         return
