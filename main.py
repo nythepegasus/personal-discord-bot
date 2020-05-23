@@ -286,7 +286,7 @@ async def steal(ctx):
         if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
             stealer = houses_steal_from.pop(houses_steal_from.index(house))
     for house in houses_steal_from:
-        if house["house_name"] in ctx.message.content:
+        if house["house_name"].lower() in ctx.message.content.lower():
             stolen_from = house
     if random.randint(1, 10) >= 7:
         if random.randint(1, 10) >= 8:
