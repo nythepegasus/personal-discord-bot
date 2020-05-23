@@ -279,19 +279,19 @@ async def cast_spell_erorr(ctx, error):
 
 @client.command()
 async def beg(ctx):
-    await ctx.send("You hear a zip sound come from under Dumbledore's robes..")
     data = json.load(open(db_file))
     for i in data["timeouts"]:
-        if ctx.message.author == i["person"]:
+        if ctx.message.author.discriminator == i["person"]:
             if time.strftime("%H", time.gmtime((i["timeout"] - time.time()))) < "24":
-                await ctx.send(f'Dumbledore\'s cock has had enough of your mouth. Please wait {24 - int(time.strftime("%H", time.gmtime((i["timeout"] - time.time()))))} hours.')
+                await ctx.send(f'Dumbledore\'s cock has had enough of your mouth. Please wait {int(time.strftime("%H", time.gmtime((i["timeout"] - time.time()))))} hours.')
                 return
     person_timeout = {
-        "person": ctx.message.author,
+        "person": ctx.message.author.discriminator,
         "timeout": time.time()
     }
     data["timeouts"].append(person_timeout)
     json.dump(data, open(db_file, "w"))
+    await ctx.send("You hear a zip sound come from under Dumbledore's robes..")
     if random.randint(1, 10) >= 5:
         points_awarded = random.randint(40, 70)
         big_award = True
