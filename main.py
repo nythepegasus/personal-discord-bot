@@ -286,7 +286,7 @@ async def steal(ctx):
         if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
             stealer = houses_steal_from.pop(houses_steal_from.index(house))
     for house in houses_steal_from:
-        if house["house_name"] in ctx.message:
+        if house["house_name"] in ctx.message.content:
             stolen_from = house
     if random.randint(1, 10) >= 7:
         if random.randint(1, 10) >= 8:
@@ -295,7 +295,7 @@ async def steal(ctx):
             amount_stolen = random.randint(5, 15)
         stolen_from["house_points"] -= amount_stolen
         stealer["house_points"] += amount_stolen
-        ctx.send(f'Your prefect found members of {stolen_from["house_name"]} fucking in the halls late at night.\nYour house stole {amount_stolen} points from their house!')
+        await ctx.send(f'Your prefect found members of {stolen_from["house_name"]} fucking in the halls late at night.\nYour house stole {amount_stolen} points from their house!')
         json.dump(data, open(db_file, "w"))
         return
     else:
@@ -304,7 +304,7 @@ async def steal(ctx):
             amount_lost = random.randint(25, 35)
         stolen_from["house_points"] += amount_lost
         stealer["house_points"] -= amount_lost
-        ctx.send(f'{stolen_from["house_name"]}\'s prefect found you bumbling about trying to spy on them. Your house gave them {amount_lost} points.')
+        await ctx.send(f'{stolen_from["house_name"]}\'s prefect found you bumbling about trying to spy on them. Your house gave them {amount_lost} points.')
         json.dump(data, open(db_file, "w"))
         return
 
