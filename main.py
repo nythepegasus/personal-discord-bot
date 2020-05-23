@@ -287,6 +287,7 @@ async def beg(ctx):
         big_award = True
     else:
         points_awarded = random.randint(25, 35)
+        big_award = False
     for house in data["houses"]:
         if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
             da_house = house["house_name"]
@@ -404,7 +405,7 @@ async def on_guild_channel_pins_update(channel, last_pin):
                     pass
             with open(db_file, "w") as f:
                 f.write(json.dumps(data, indent=4))
-            await channel.send(f"10 points to {da_house}!")
+            await channel.send(f"50 points to {da_house}!")
         except IndexError:
             pass
 
