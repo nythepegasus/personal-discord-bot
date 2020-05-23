@@ -23,7 +23,7 @@ tonys_a_cunt = [
         "nigger",
 ]
 
-TOKEN = "NTIxNTUwNzIyMzU0MTE4NjY2.XqzV7Q.gvob9l9tcZe2_W_vH_54Y-shW1A"
+TOKEN = "NzA2NTYzMzI0NTYwODAxNzkz.XsmI0Q.pirsJLD8RlC-Kkm3eqgpUfKn_RI"
 client = commands.Bot(command_prefix="buh!")
 client.remove_command("help")
 
@@ -374,12 +374,25 @@ async def on_message(message):
         dmchannel = await message.author.create_dm()
         await dmchannel.send("You're a cunt for trying that.")
         return
-    if message.content == "" and len(message.attachments) == 0:
+    if message.content == "" and len(message.attachments) == 0 and message.channel.name == "general":
         data = json.load(open(db_file))
+        async for i in message.channel.history(limit=1):
+            print(i.author)
+            print(i.author.roles)
+        myPins = await message.channel.pins()
+        print(myPins[0].author.roles)
         for house in data["houses"]:
-            if house["house_name"].lower() in [y.name.lower() for y in latestPin.author.roles]:
+            if house["house_name"].lower() in [y.name.lower() for y in message.author.roles]:
+                print("Found house!")
                 da_house = house["house_name"]
-                house["house_points"] += 30
+                print(da_house)
+                if da_house.lower() not in [y.name.lower() for y in myPins[0].author.roles]:
+                    print("Houses no match")
+                    house["house_points"] += 30
+                    message.channel.send(f"30 points to {da_house}, for pinning the message.")
+                else:
+                    print("Houses match")
+                    pass
         json.dump(data, open(db_file, "w"))
         return
     update_phrase(message.content)
@@ -455,7 +468,7 @@ async def on_guild_channel_pins_update(channel, last_pin):
                     pass
             with open(db_file, "w") as f:
                 f.write(json.dumps(data, indent=4))
-            await channel.send(f"50 points to {da_house}!\n(And 30 points to the pinner's house ;))")
+            await channel.send(f"50 points to {da_house}!")
         except IndexError:
             pass
 
