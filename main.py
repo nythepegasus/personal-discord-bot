@@ -374,6 +374,14 @@ async def on_message(message):
         dmchannel = await message.author.create_dm()
         await dmchannel.send("You're a cunt for trying that.")
         return
+    if message.content == "" and len(message.attachments) == 0:
+        data = json.load(open(db_file))
+        for house in data["houses"]:
+            if house["house_name"].lower() in [y.name.lower() for y in latestPin.author.roles]:
+                da_house = house["house_name"]
+                house["house_points"] += 30
+        json.dump(data, open(db_file, "w"))
+        return
     update_phrase(message.content)
     await client.process_commands(message)
 
@@ -447,7 +455,7 @@ async def on_guild_channel_pins_update(channel, last_pin):
                     pass
             with open(db_file, "w") as f:
                 f.write(json.dumps(data, indent=4))
-            await channel.send(f"50 points to {da_house}!")
+            await channel.send(f"50 points to {da_house}!\n(And 30 points to the pinner's house ;))")
         except IndexError:
             pass
 
