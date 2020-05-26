@@ -23,7 +23,7 @@ tonys_a_cunt = [
         "nigger",
 ]
 
-TOKEN = "NzA2NTYzMzI0NTYwODAxNzkz.XsmI0Q.pirsJLD8RlC-Kkm3eqgpUfKn_RI"
+TOKEN = "NTIxNTUwNzIyMzU0MTE4NjY2.XsmXnA.YpoqE4VwrVWz1ztplT0l_13Hz2E"
 client = commands.Bot(command_prefix="buh!")
 client.remove_command("help")
 
@@ -373,19 +373,6 @@ async def on_message(message):
         await message.delete()
         dmchannel = await message.author.create_dm()
         await dmchannel.send("You're a cunt for trying that.")
-        return
-    if message.content == "" and len(message.attachments) == 0 and message.channel.name == "general":
-        data = json.load(open(db_file))
-        myPins = await message.channel.pins()
-        for house in data["houses"]:
-            if house["house_name"].lower() in [y.name.lower() for y in message.author.roles]:
-                da_house = house["house_name"]
-                if da_house.lower() not in [y.name.lower() for y in myPins[0].author.roles]:
-                    house["house_points"] += 30
-                    await message.channel.send(f"30 points to {da_house}, for pinning the message.")
-                else:
-                    pass
-        json.dump(data, open(db_file, "w"))
         return
     update_phrase(message.content)
     await client.process_commands(message)
