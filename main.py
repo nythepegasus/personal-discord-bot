@@ -340,10 +340,10 @@ async def beg(ctx):
     await ctx.send("You hear a zip sound come from under Dumbledore's robes..")
     if random.randint(1, 10) >= 5:
         points_awarded = random.randint(40, 70)
-        big_award = True
+        await ctx.send(f"Dumbledore seems very pleased with how you sucked his cock.\n{da_house} earns {points_awarded} points for your awesome head skills!")
     else:
         points_awarded = random.randint(25, 35)
-        big_award = False
+        await ctx.send(f"Dumbledore is somewhat okay with how you gave head. Just uh, use less teeth next time, got it?\n{points_awarded} points to {da_house}.")
     for house in data["houses"]:
         if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
             da_house = house["house_name"]
@@ -352,10 +352,6 @@ async def beg(ctx):
                 f.write(json.dumps(data, indent=4))
         else:
             pass
-    if big_award:
-        await ctx.send(f"Dumbledore seems very pleased with how you sucked his cock.\n{da_house} earns {points_awarded} points for your awesome head skills!")
-    else:
-        await ctx.send(f"Dumbledore is somewhat okay with how you gave head. Just uh, use less teeth next time, got it?\n{points_awarded} points to {da_house}.")
 
 
 """
