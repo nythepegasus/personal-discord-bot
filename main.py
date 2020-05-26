@@ -321,12 +321,12 @@ async def steal_erorr(ctx, error):
 async def beg(ctx):
     data = json.load(open(db_file))
     for i in data["timeouts"]:
-        if ctx.message.author.discriminator == i["person"]:
-            if time.strftime("%H", time.gmtime((i["timeout"] - time.time()))) < "24":
-                await ctx.send(f'Dumbledore\'s cock has had enough of your mouth. Please wait {int(time.strftime("%H", time.gmtime((i["timeout"] - time.time()))))} hours.')
+        if ctx.message.author.id == i["person"]:
+            if time.gmtime(time.time() - i["timeout"]).tm_yday == 1:
+                await ctx.send(f'Dumbledore\'s cock has had enough of your mouth. Please wait {time.gmtime(time.time() - i["timeout"]).tm_hour} hours and {time.gmtime(time.time() - i["timeout"]).tm_min} minutes.')
                 return
     person_timeout = {
-        "person": ctx.message.author.discriminator,
+        "person": ctx.message.author.id,
         "timeout": time.time()
     }
     data["timeouts"].append(person_timeout)
