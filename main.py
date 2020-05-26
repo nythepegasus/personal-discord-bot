@@ -322,7 +322,7 @@ async def beg(ctx):
     data = json.load(open(db_file))
     for i in data["timeouts"]:
         if ctx.message.author.id == i["person"]:
-            if time.gmtime(time.time() - i["timeout"]).tm_yday == 1:
+            if time.gmtime(time.time() - i["timeout"]).tm_yday == 1 and time.gmtime(time.time() - i["timeout"]).tm_year > 1970:
                 await ctx.send(f'Dumbledore\'s cock has had enough of your mouth. Please wait {time.gmtime(time.time() - i["timeout"]).tm_hour} hours and {time.gmtime(time.time() - i["timeout"]).tm_min} minutes.')
                 return
     person_timeout = {
