@@ -320,18 +320,23 @@ async def steal_erorr(ctx, error):
 @client.command()
 async def beg(ctx):
     data = json.load(open(db_file))
-    for i in data["timeouts"]:
-        if ctx.message.author.id == i["person"]:
-            cur_timeout = time.gmtime(time.time() - i["timeout"])
-            if cur_timeout.tm_hour < 24 and cur_timeout.tm_yday == 1 and cur_timeout.tm_year <= 1970:
-                await ctx.send(f'Dumbledore\'s cock has had enough of your mouth. Please wait {time.gmtime(i["timeout"] - time.time()).tm_hour} hours and {time.gmtime(i["timeout"] - time.time()).tm_min} minutes.')
-                return
-    person_timeout = {
-        "person": ctx.message.author.id,
-        "timeout": time.time()
-    }
-    data["timeouts"].append(person_timeout)
-    json.dump(data, open(db_file, "w"))
+    if any(ctx.message.author.id for i in [i["person"] for i in data["timeouts"]]):
+        for i in data["timeouts"]:
+            if ctx.message.author.id == i["person"]:
+                cur_timeout = time.gmtime(time.time() - i["timeout"])
+                if cur_timeout.tm_hour < 24 and cur_timeout.tm_yday == 1 and cur_timeout.tm_year <= 1970:
+                    await ctx.send(f'Dumbledore\'s cock has had enough of your mouth. Please wait {time.gmtime(i["timeout"] - time.time()).tm_hour} hours and {time.gmtime(i["timeout"] - time.time()).tm_min} minutes.')
+                    return
+                else:
+                    i["timeout"] = time.time()
+                    json.dump(data, open(db_file, "w"))
+    else:
+        person_timeout = {
+            "person": ctx.message.author.id,
+            "timeout": time.time()
+        }
+        data["timeouts"].append(person_timeout)
+        json.dump(data, open(db_file, "w"))
     await ctx.send("You hear a zip sound come from under Dumbledore's robes..")
     if random.randint(1, 10) >= 5:
         points_awarded = random.randint(40, 70)
