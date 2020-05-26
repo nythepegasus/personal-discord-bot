@@ -288,18 +288,21 @@ async def steal(ctx):
     for house in houses_steal_from:
         if house["house_name"].lower() in ctx.message.content.lower():
             stolen_from = house
+        else:
+            await ctx.send("Why're you trying to steal from yourself? You're lucky your prefect ain't rapin' your ass for that.")
+            return
     if random.randint(1, 10) >= 7:
         if random.randint(1, 10) >= 8:
-            amount_stolen = random.randint(20, 30)
+            amount_stolen = random.randint(35, 45)
         else:
-            amount_stolen = random.randint(5, 15)
+            amount_stolen = random.randint(25, 35)
         stolen_from["house_points"] -= amount_stolen
         stealer["house_points"] += amount_stolen
         await ctx.send(f'Your prefect found members of {stolen_from["house_name"]} fucking in the halls late at night.\nYour house stole {amount_stolen} points from their house!')
         json.dump(data, open(db_file, "w"))
         return
     else:
-        amount_lost = random.randint(6, 16)
+        amount_lost = random.randint(15, 20)
         if random.randint(1,10) <= 4:
             amount_lost = random.randint(25, 35)
         stolen_from["house_points"] += amount_lost
