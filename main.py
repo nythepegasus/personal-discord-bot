@@ -324,7 +324,7 @@ async def beg(ctx):
         if ctx.message.author.id == i["person"]:
             cur_timeout = time.gmtime(time.time() - i["timeout"])
             if cur_timeout.tm_hour < 24 and cur_timeout.tm_yday == 1 and cur_timeout.tm_year <= 1970:
-                await ctx.send(f'Dumbledore\'s cock has had enough of your mouth. Please wait {time.gmtime(time.time() - i["timeout"]).tm_hour} hours and {time.gmtime(time.time() - i["timeout"]).tm_min} minutes.')
+                await ctx.send(f'Dumbledore\'s cock has had enough of your mouth. Please wait {23 - time.gmtime(time.time() - i["timeout"]).tm_hour} hours and {time.gmtime(time.time() - i["timeout"]).tm_min} minutes.')
                 return
     person_timeout = {
         "person": ctx.message.author.id,
