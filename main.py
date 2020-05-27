@@ -7,7 +7,7 @@ Start of the variables and such for the backend.
 """
 
 
-TOKEN = "NzA2NTYzMzI0NTYwODAxNzkz.Xs54kw.En9cwKk5jTpIAOH1LjX32_VuvR0"
+TOKEN = "NTIxNTUwNzIyMzU0MTE4NjY2.Xs6qQQ.Ngcld6mD4Ip6CzkCz_mjLu8Nf-E"
 client = commands.Bot(command_prefix="buh!")
 client.owner_id = 195864152856723456
 client.remove_command("help")
