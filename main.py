@@ -341,20 +341,19 @@ async def beg(ctx):
         data["timeouts"].append(person_timeout)
         json.dump(data, open(db_file, "w"))
     await ctx.send("You hear a zip sound come from under Dumbledore's robes..")
-    if random.randint(1, 10) >= 5:
-        points_awarded = random.randint(40, 70)
-        await ctx.send(f"Dumbledore seems very pleased with how you sucked his cock.\n{da_house} earns {points_awarded} points for your awesome head skills!")
-    else:
-        points_awarded = random.randint(25, 35)
-        await ctx.send(f"Dumbledore is somewhat okay with how you gave head. Just uh, use less teeth next time, got it?\n{points_awarded} points to {da_house}.")
     for house in data["houses"]:
         if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
-            da_house = house["house_name"]
-            house["house_points"] += points_awarded
-            with open(db_file, "w") as f:
-                f.write(json.dumps(data, indent=4))
+            da_house = house
         else:
             pass
+    if random.randint(1, 10) >= 5:
+        points_awarded = random.randint(40, 70)
+        await ctx.send(f"Dumbledore seems very pleased with how you sucked his cock.\n{da_house['house_name']} earns {points_awarded} points for your awesome head skills!")
+    else:
+        points_awarded = random.randint(25, 35)
+        await ctx.send(f"Dumbledore is somewhat okay with how you gave head. Just uh, use less teeth next time, got it?\n{points_awarded} points to {da_house['house_name']}.")
+    da_house["house_points"] += points_awarded
+    json.dump(data, open(db_file, "w"), indent=4)
 
 
 """
