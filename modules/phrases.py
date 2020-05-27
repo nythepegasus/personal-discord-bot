@@ -76,7 +76,6 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
         if message.author == self.client.user:
             return
         self.update_phrase(message.content)
-        await self.client.process_commands(message)
 
 
 
