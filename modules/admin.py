@@ -32,6 +32,7 @@ class AdminCog(commands.Cog, name="Admin Commands"):
         try:
             if cog == "modules.admin":
                 await ctx.send("It's not recommended to unload the admin cog.")
+                return
             self.client.unload_extension(cog)
         except Exception as e:
             await ctx.send(f'**`ERROR:`**\n {type(e).__name__} - {e}')
