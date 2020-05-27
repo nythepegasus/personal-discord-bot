@@ -44,8 +44,8 @@ class AdminCog(commands.Cog, name="Admin Commands"):
     async def reload(self, ctx, *, cog: str):
         """Command which Reloads a Module."""
         try:
-            self.client.unload(cog)
-            self.client.load(cog)
+            self.client.unload_extension(cog)
+            self.client.load_extension(cog)
         except Exception as e:
             await ctx.send(f'**`ERROR:`** {type(e).__name__} - {e}')
         else:
