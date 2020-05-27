@@ -323,7 +323,7 @@ async def steal_erorr(ctx, error):
 @client.command()
 async def beg(ctx):
     data = json.load(open(db_file))
-    if any(ctx.message.author.id for i in [i["person"] for i in data["timeouts"]]):
+    if ctx.message.author.id in [i["person"] for i in data["timeouts"]]:
         for i in data["timeouts"]:
             if ctx.message.author.id == i["person"]:
                 cur_timeout = time.gmtime(time.time() - i["timeout"])
