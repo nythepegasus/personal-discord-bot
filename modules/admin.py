@@ -18,7 +18,7 @@ class AdminCog(commands.Cog, name="Admin Commands"):
     async def load(self, ctx, *, cog: str):
         """Command which Loads a Module."""
         try:
-            self.bot.load_extension(cog)
+            self.client.load_extension(cog)
         except Exception as e:
             await ctx.send(f'**`ERROR:`**\n {type(e).__name__} - {e}')
         else:
@@ -32,7 +32,7 @@ class AdminCog(commands.Cog, name="Admin Commands"):
         try:
             if cog == "modules.admin":
                 await ctx.send("It's not recommended to unload the admin cog.")
-            self.bot.unload_extension(cog)
+            self.client.unload_extension(cog)
         except Exception as e:
             await ctx.send(f'**`ERROR:`**\n {type(e).__name__} - {e}')
         else:
@@ -44,7 +44,7 @@ class AdminCog(commands.Cog, name="Admin Commands"):
     async def reload(self, ctx, *, cog: str):
         """Command which Reloads a Module."""
         try:
-            self.bot.reload_extension(cog)
+            self.client.reload_extension(cog)
         except Exception as e:
             await ctx.send(f'**`ERROR:`** {type(e).__name__} - {e}')
         else:
