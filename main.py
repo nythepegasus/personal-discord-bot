@@ -7,14 +7,6 @@ Start of the variables and such for the backend.
 """
 
 
-tonys_a_cunt = [
-        "\u0628",
-        "\u064d",
-        "\u0631",
-        "nigga",
-        "nigger",
-]
-
 TOKEN = "NzA2NTYzMzI0NTYwODAxNzkz.Xs54kw.En9cwKk5jTpIAOH1LjX32_VuvR0"
 client = commands.Bot(command_prefix="buh!")
 client.remove_command("help")
