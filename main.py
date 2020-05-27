@@ -1,18 +1,10 @@
-import os, json, datetime, time, psutil, discord, speedtest, subprocess, random
+import sys, traceback, discord
 from discord.ext import commands
 
 
 """
 Start of the variables and such for the backend.
 """
-
-
-db_file = "phrases.json"
-
-
-if not os.path.isfile(db_file):
-    with open(db_file, "w") as f:
-        f.write('{\n"phrases": [],\n"houses": [\n{\n"house_name": "Gryffindor",\n"house_points": 0\n},\n{\n"house_name": "Slytherin",\n"house_points": 0\n},\n{\n"house_name": "Ravenclaw",\n"house_points": 0\n},\n{\n"house_name": "Hufflepuff",\n"house_points": 0\n}\n],\n"last_pin_count": 0,\n"timeouts": []}')
 
 
 tonys_a_cunt = [
@@ -23,36 +15,26 @@ tonys_a_cunt = [
         "nigger",
 ]
 
-TOKEN = "NTIxNTUwNzIyMzU0MTE4NjY2.XsmXnA.YpoqE4VwrVWz1ztplT0l_13Hz2E"
+TOKEN = "NzA2NTYzMzI0NTYwODAxNzkz.Xs54kw.En9cwKk5jTpIAOH1LjX32_VuvR0"
 client = commands.Bot(command_prefix="buh!")
 client.remove_command("help")
 
+initial_extensions = [
+            "modules.admin",
+            "modules.points",
+            "modules.phrases",
+            "modules.util"
+]
+
 
 """
-Start of the commands and functions for all the backend.
+Start of importing cogs.
 """
 
 
-@client.command(aliases=["h"])
-async def help(ctx):
-    help_emb = discord.Embed(title="Bot Commands", colour=0x00adff)
-    help_emb.add_field(name="buh!add_phrase | buh!ap", value="Add phrase to the tracker", inline=False)
-    help_emb.add_field(name="buh!remove_phrase | buh!rp", value="Remove phrase from the tracker", inline=False)
-    help_emb.add_field(name="buh!phrases_counts | buh!pc", value="Check phrases on the tracker", inline=False)
-    help_emb.add_field(name="buh!archive_pins | buh!arcp", value="Archive all pins from #general chat", inline=False)
-    help_emb.add_field(name="buh!house_points | buh!hp", value="Check each house's points.", inline=False)
-    help_emb.add_field(name="buh!cast_spell | buh!cs", value="Gamble your house's points away, and see where fate takes you.", inline=False)
-    help_emb.add_field(name="buh!stats", value="Check the discord bot's current server stats", inline=False)
-    help_emb.add_field(name="buh!netstats", value="Check the discord bot's current net stats", inline=False)
-    help_emb.add_field(name="More to come!", value=":3", inline=False)
-    help_emb.set_footer(text="Developed by Nikki")
-    await ctx.send(embed=help_emb)
-
-
-@client.command(name="add_phrase", aliases=["ap"])
-async def add_phrase(ctx, phrase):
-    data = json.load(open(db_file))
+for extension in initial_extensions:
     try:
+<<<<<<< HEAD
         cur_index = data["phrases"][-1]["uid"] + 1
     except IndexError:
         cur_index = 1
@@ -354,6 +336,13 @@ async def beg(ctx):
         await ctx.send(f"Dumbledore is somewhat okay with how you gave head. Just uh, use less teeth next time, got it?\n{points_awarded} points to {da_house['house_name']}.")
     da_house["house_points"] += points_awarded
     json.dump(data, open(db_file, "w"), indent=4)
+=======
+        client.load_extension(extension)
+        print(f"Loaded {extension}.")
+    except Exception as e:
+        print(f'Failed to load extension {extension}.', file=sys.stderr)
+        traceback.print_exc()
+>>>>>>> 97ca4078d09932122ed0301138a9e004b3b851c0
 
 
 """
@@ -367,93 +356,6 @@ async def on_ready():
     await client.change_presence(activity=funny_activity)
     for guild in client.guilds:
         print(f"Tester in {guild}")
-
-
-@client.event
-async def on_message(message):
-    if message.author == client.user:
-        return
-    if any(bad in message.content for bad in tonys_a_cunt):
-        await message.delete()
-        dmchannel = await message.author.create_dm()
-        await dmchannel.send("You're a cunt for trying that.")
-        return
-    update_phrase(message.content)
-    await client.process_commands(message)
-
-
-@client.event
-async def on_message_delete(message):
-    user = client.get_user(195864152856723456)
-    emb = discord.Embed(
-        description = message.content,
-        timestamp = datetime.datetime.utcfromtimestamp(int(time.time())),
-    )
-    emb.set_author(
-        name=message.author,
-        icon_url=message.author.avatar_url,
-        url="https://discordapp.com/channels/{0}/{1}/{2}".format(
-            message.guild.id, message.channel.id, message.id)
-    )
-    if message.attachments:
-        if len(message.attachments) > 1:
-            img_url = message.attachments[0].url
-            emb.set_image(url=img_url)
-            emb.set_footer(text=f"Part 1 | Archived from #{message.channel}")
-            await user.send(embed=emb)
-            attach_counter = 1
-            try:
-                for attachment in message.attachments:
-                    next_emb = discord.Embed(
-                        timestamp = datetime.datetime.utcfromtimestamp(int(time.time())),
-                    )
-                    next_emb.set_author(
-                    name=message.author,
-                    icon_url=message.author.avatar_url,
-                    url="https://discordapp.com/channels/{0}/{1}/{2}".format(
-                        message.guild.id, message.channel.id, message.id)
-                    )
-                    img_url = message.attachments[attach_counter].url
-                    next_emb.set_image(url=img_url)
-                    next_emb.set_footer(text=f"Part {attach_counter+1} | Deleted from #{message.channel}")
-                    attach_counter += 1
-                    await user.send(embed=next_emb)
-            except IndexError:
-                pass
-        elif len(message.attachments) == 1:
-            img_url = message.attachments[0].url
-            emb.set_image(url=img_url)
-            emb.set_footer(text=f"Deleted from #{message.channel}")
-            await user.send(embed=emb)
-    else:
-        await user.send(embed=emb)
-
-@client.event
-async def on_guild_channel_pins_update(channel, last_pin):
-    if channel.name != "general":
-        return
-    data = json.load(open(db_file))
-    myPins = await channel.pins()
-    if data["last_pin_count"] > len(myPins):
-        data["last_pin_count"] = len(myPins)
-        with open(db_file, "w") as f:
-            f.write(json.dumps(data, indent=4))
-        return
-    else:
-        data["last_pin_count"] = len(myPins)
-        try:
-            latestPin = myPins[0]
-            for house in data["houses"]:
-                if house["house_name"].lower() in [y.name.lower() for y in latestPin.author.roles]:
-                    da_house = house["house_name"]
-                    house["house_points"] += 50
-                else:
-                    pass
-            with open(db_file, "w") as f:
-                f.write(json.dumps(data, indent=4))
-            await channel.send(f"50 points to {da_house}!")
-        except IndexError:
-            pass
 
 
 client.run(TOKEN)
