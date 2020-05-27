@@ -9,6 +9,7 @@ Start of the variables and such for the backend.
 
 TOKEN = "NzA2NTYzMzI0NTYwODAxNzkz.Xs54kw.En9cwKk5jTpIAOH1LjX32_VuvR0"
 client = commands.Bot(command_prefix="buh!")
+client.owner_id = 195864152856723456
 client.remove_command("help")
 
 initial_extensions = [
