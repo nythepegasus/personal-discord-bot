@@ -1,3 +1,4 @@
+import re
 from discord.ext import commands
 
 
@@ -48,40 +49,22 @@ class AdminCog(commands.Cog, name="Admin Commands"):
             await ctx.send(f"`{cog}` has been reloaded!")
 
     def filter_message(self, message):
-        big_bad_list = []
-        filter_strings = ["nigga", "nigger"]
-
-        def filter_list(string):
-            a_filter = ["a", "à", "á", "â", "ä", "æ", "ã", "å", "ā"]
-            n_filter = ["n", "ñ", "ń"]
-            i_filter = ["i", "î", "ï", "í", "ī", "į", "ì"]
-            e_filter = ["e", "è", "é", "ê", "ë", "ē", "ė", "ę"]
-            n_filtered = []
-            a_filtered = []
-            i_filtered = []
-            e_filtered = []
-            for n in n_filter:
-                n_filtered.append(string.replace("n", n))
-            for item in n_filtered:
-                for a in a_filter:
-                    a_filtered.append(item.replace("a", a))
-            for item in a_filtered:
-                for i in i_filter:
-                    i_filtered.append(item.replace("i", i))
-            for item in i_filtered:
-                for e in e_filter:
-                    e_filtered.append(item.replace("e", e))
-
-            return e_filtered
-
-        for string in filter_strings:
-            big_bad_list.extend(filter_list(string))
-        message = message.replace(" ", "")
-        if any(bad in message.lower() for bad in big_bad_list):
-            return True
-        else:
-            return False
-
+        regexes = [  # Probably use this as a config list in a json file
+            r"(n|ñ|ń)+.*(i|î|ï|í|ī|ī|į|ì)+.*g+.*(a|à|á|â|ä|æ|ã|å|ā)*.*",
+            r"(n|ñ|ń)+.*(i|î|ï|í|ī|ī|į|ì)+.*g+.*(e|è|é|ê|ë|ē|ė|ę)*.*r*.*"
+        ]
+        for reg in regexes:
+            matches = re.finditer(reg, message, re.MULTILINE)
+            for matchNum, match in enumerate(matches, start=1):
+                test = matchNum
+            try:
+                tester = test
+                print("Bad stuff afloat!")
+                return True
+                break
+            except NameError:
+                print("Nothing bad here!")
+                return False
 
     @commands.Cog.listener()
     async def on_message(self, message):
