@@ -49,6 +49,7 @@ class AdminCog(commands.Cog, name="Admin Commands"):
             await ctx.send(f"`{cog}` has been reloaded!")
 
     def filter_message(self, message):
+        message = message.replace(" ", "")
         regexes = [  # Probably use this as a config list in a json file
             r"(n|ñ|ń)+.*(i|î|ï|í|ī|ī|į|ì)+.*g+.*(a|à|á|â|ä|æ|ã|å|ā)*.*",
             r"(n|ñ|ń)+.*(i|î|ï|í|ī|ī|į|ì)+.*g+.*(e|è|é|ê|ë|ē|ė|ę)*.*r*.*"
