@@ -48,56 +48,40 @@ class AdminCog(commands.Cog, name="Admin Commands"):
             await ctx.send(f"`{cog}` has been reloaded!")
 
     def filter_message(self, message):
-        a_filter = ["a", "à", "á", "â", "ä", "æ", "ã", "å", "ā"]
-        n_filter = ["n", "ñ", "ń"]
-        i_filter = ["i", "î", "ï", "í", "ī", "į", "ì"]
-        e_filter = ["e", "è", "é", "ê", "ë", "ē", "ė", "ę"]
-
-        string = "nigga"
-
-        n_filtered = []
-        a_filtered = []
-        i_filtered = []
-        for n in n_filter:
-            n_filtered.append(string.replace("n", n))
-        for item in n_filtered:
-            for a in a_filter:
-                a_filtered.append(item.replace("a", a))
-        for item in a_filtered:
-            for i in i_filter:
-                i_filtered.append(item.replace("i", i))
-
-        first_filtered = i_filtered
-
-        string = "nigger"
-
-        n_filtered = []
-        a_filtered = []
-        i_filtered = []
-        e_filtered = []
-        for n in n_filter:
-            n_filtered.append(string.replace("n", n))
-        for item in n_filtered:
-            for a in a_filter:
-                a_filtered.append(item.replace("a", a))
-        for item in a_filtered:
-            for i in i_filter:
-                i_filtered.append(item.replace("i", i))
-        for item in i_filtered:
-            for e in e_filter:
-                e_filtered.append(item.replace("e", e))
-
-        second_filtered = e_filtered
-
         big_bad_list = []
-        big_bad_list.extend(first_filtered)
-        big_bad_list.extend(second_filtered)
+        filter_strings = ["nigga", "nigger"]
 
+        def filter_list(string):
+            a_filter = ["a", "à", "á", "â", "ä", "æ", "ã", "å", "ā"]
+            n_filter = ["n", "ñ", "ń"]
+            i_filter = ["i", "î", "ï", "í", "ī", "į", "ì"]
+            e_filter = ["e", "è", "é", "ê", "ë", "ē", "ė", "ę"]
+            n_filtered = []
+            a_filtered = []
+            i_filtered = []
+            e_filtered = []
+            for n in n_filter:
+                n_filtered.append(string.replace("n", n))
+            for item in n_filtered:
+                for a in a_filter:
+                    a_filtered.append(item.replace("a", a))
+            for item in a_filtered:
+                for i in i_filter:
+                    i_filtered.append(item.replace("i", i))
+            for item in i_filtered:
+                for e in e_filter:
+                    e_filtered.append(item.replace("e", e))
+
+            return e_filtered
+
+        for string in filter_strings:
+            big_bad_list.extend(filter_list(string))
         message = message.replace(" ", "")
-        if any(bad in message for bad in big_bad_list):
+        if any(bad in message.lower() for bad in big_bad_list):
             return True
         else:
             return False
+
 
     @commands.Cog.listener()
     async def on_message(self, message):
