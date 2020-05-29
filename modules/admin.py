@@ -1,4 +1,3 @@
-import discord
 from discord.ext import commands
 
 
@@ -6,11 +5,10 @@ class AdminCog(commands.Cog, name="Admin Commands"):
     def __init__(self, client):
         self.client = client
         self.tonys_a_cunt = [
-                "\u0628",
-                "\u064d",
-                "\u0631",
-                "nigga",
-                "nigger",
+            "\u0628",
+            "\u064d",
+            "\u0631",
+            "nigg",
         ]
 
     @commands.command(name='load', hidden=True)
@@ -23,7 +21,6 @@ class AdminCog(commands.Cog, name="Admin Commands"):
             await ctx.send(f'**`ERROR:`**\n {type(e).__name__} - {e}')
         else:
             await ctx.send(f"`{cog}` has been loaded!")
-
 
     @commands.command(name='unload', hidden=True)
     @commands.is_owner()
@@ -39,7 +36,6 @@ class AdminCog(commands.Cog, name="Admin Commands"):
         else:
             await ctx.send(f"`{cog}` has been unloaded!")
 
-
     @commands.command(name='reload', hidden=True)
     @commands.is_owner()
     async def reload(self, ctx, *, cog: str):
@@ -52,15 +48,18 @@ class AdminCog(commands.Cog, name="Admin Commands"):
         else:
             await ctx.send(f"`{cog}` has been reloaded!")
 
+    def filter_message(self, message):
+        message = message.replace(" ", "")
+        if any(bad in message for bad in self.tonys_a_cunt):
+            return True
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if any(bad in message.content for bad in self.tonys_a_cunt):
+        if any(bad in message.content for bad in self.tonys_a_cunt) or self.filter_message(message.content):
             await message.delete()
             dmchannel = await message.author.create_dm()
             await dmchannel.send("You're a cunt for trying that.")
             return
-
 
 
 def setup(client):

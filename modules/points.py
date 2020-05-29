@@ -1,4 +1,7 @@
-import discord, json, random, time
+import discord
+import json
+import random
+import time
 from discord.ext import commands
 
 
@@ -14,7 +17,6 @@ class PointsCog(commands.Cog, name="Points Commands"):
         for house in data["houses"]:
             house_emb.add_field(name=house["house_name"], value=house["house_points"], inline=False)
         await ctx.send(embed=house_emb)
-
 
     @commands.cooldown(1, 180, commands.BucketType.user)
     @commands.command(aliases=["cs"])
@@ -70,7 +72,6 @@ class PointsCog(commands.Cog, name="Points Commands"):
             else:
                 pass
 
-
     @cast_spell.error
     async def cast_spell_erorr(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
@@ -78,21 +79,25 @@ class PointsCog(commands.Cog, name="Points Commands"):
         else:
             raise error
 
-
     @commands.cooldown(1, 600, commands.BucketType.user)
     @commands.command()
     async def steal(self, ctx):
         data = json.load(open(self.db_file))
         houses_steal_from = data["houses"].copy()
         for house in houses_steal_from:
-            if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
+            if house["house_name"] in ctx.author.roles:
                 stealer = houses_steal_from.pop(houses_steal_from.index(house))
         for house in houses_steal_from:
             if house["house_name"].lower() in ctx.message.content.lower():
                 stolen_from = house
-            else:
+            elif stealer == stolen_from:
                 await ctx.send("Why're you trying to steal from yourself? You're lucky your prefect ain't rapin' your ass for that.")
                 return
+            else:
+                await ctx.send("Something went wrong somewhere.")
+                await ctx.send(f"Variables:")
+                await ctx.send(f"Stealer: {stealer}")
+                await ctx.send(f"Stolen from: {stolen_from}")
         if random.randint(1, 10) >= 7:
             if random.randint(1, 10) >= 8:
                 amount_stolen = random.randint(35, 45)
@@ -105,7 +110,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
             return
         else:
             amount_lost = random.randint(15, 20)
-            if random.randint(1,10) <= 4:
+            if random.randint(1, 10) <= 4:
                 amount_lost = random.randint(25, 35)
             stolen_from["house_points"] += amount_lost
             stealer["house_points"] -= amount_lost
@@ -113,14 +118,12 @@ class PointsCog(commands.Cog, name="Points Commands"):
             json.dump(data, open(self.db_file, "w"), indent=4)
             return
 
-
     @steal.error
     async def steal_erorr(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(f"You're a little tired from your last fiasco. Wait {round(error.retry_after, 2)} seconds to try again.")
         else:
             raise error
-
 
     @commands.command()
     async def beg(self, ctx):
@@ -161,11 +164,11 @@ class PointsCog(commands.Cog, name="Points Commands"):
     async def on_guild_channel_pins_update(self, channel, last_pin):
         if channel.name != "general":
             return
-        data = json.load(open(db_file))
+        data = json.load(open(self.db_file))
         myPins = await channel.pins()
         if data["last_pin_count"] > len(myPins):
             data["last_pin_count"] = len(myPins)
-            with open(db_file, "w") as f:
+            with open(self.db_file, "w") as f:
                 f.write(json.dumps(data, indent=4))
             return
         else:
@@ -178,11 +181,12 @@ class PointsCog(commands.Cog, name="Points Commands"):
                         house["house_points"] += 50
                     else:
                         pass
-                with open(db_file, "w") as f:
+                with open(self.db_file, "w") as f:
                     f.write(json.dumps(data, indent=4))
                 await channel.send(f"50 points to {da_house}!")
             except IndexError:
                 pass
+
 
 def setup(client):
     client.add_cog(PointsCog(client))

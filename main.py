@@ -1,4 +1,6 @@
-import sys, traceback, discord
+import sys
+import traceback
+import discord
 from discord.ext import commands
 
 
@@ -31,6 +33,7 @@ for extension in initial_extensions:
         print(f"Loaded {extension}.")
     except Exception as e:
         print(f'Failed to load extension {extension}.', file=sys.stderr)
+        print(f"{type(e).__name__} - {e}")
         traceback.print_exc()
 
 
