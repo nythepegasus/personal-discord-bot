@@ -94,7 +94,7 @@ class AdminCog(commands.Cog, name="Admin Commands"):
         big_bad_list.extend(second_filtered)
 
         message = message.replace(" ", "")
-        if any(bad in message for bad in big_bad_list):
+        if any(bad in message.lower() for bad in big_bad_list):
             return True
         else:
             return False
