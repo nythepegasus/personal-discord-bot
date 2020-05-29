@@ -87,24 +87,13 @@ class PointsCog(commands.Cog, name="Points Commands"):
         for house in houses_steal_from:
             if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
                 stealing_house_name = house
-        print(stealing_house_name)
-        print(house_name.lower())
         for house in houses_steal_from:
-            print("Running to find steal_from")
-            print(house["house_name"].lower())
-            print(house_name.lower())
             if house["house_name"].lower() == house_name.lower():
-                print("I ran, weirdly")
                 stolen_from = house
                 break
         if stolen_from == stealing_house_name:
             await ctx.send("Why're you trying to steal from yourself? You're lucky your prefect ain't rapin' your ass for that.")
             return
-        else:
-            await ctx.send("Something maybe went right?.")
-            await ctx.send(f"Variables:")
-            await ctx.send(f"Stealer: {stealing_house_name}")
-            await ctx.send(f"Stolen from: {stolen_from}")
         if random.randint(1, 10) >= 7:
             if random.randint(1, 10) >= 8:
                 amount_stolen = random.randint(35, 45)
