@@ -103,7 +103,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
         else:
             await ctx.send("Something maybe went right?.")
             await ctx.send(f"Variables:")
-            await ctx.send(f"Stealer: {stealer}")
+            await ctx.send(f"Stealer: {stealing_house_name}")
             await ctx.send(f"Stolen from: {stolen_from}")
         if random.randint(1, 10) >= 7:
             if random.randint(1, 10) >= 8:
