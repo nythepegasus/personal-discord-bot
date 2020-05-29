@@ -49,17 +49,43 @@ class AdminCog(commands.Cog, name="Admin Commands"):
 
     def filter_message(self, message):
         big_bad_list = []
+<<<<<<< HEAD
         filter_strings = ["nigga", "nigger"]
+=======
+        filter_strings = ["nigga", "nigger", "nibba", "negro", "negroid"]  # Should make this into a config
+>>>>>>> e84f37052d2416ac4cfdf0ab2d98d74ddcd18b2e
 
         def filter_list(string):
             a_filter = ["a", "à", "á", "â", "ä", "æ", "ã", "å", "ā"]
             n_filter = ["n", "ñ", "ń"]
+<<<<<<< HEAD
             i_filter = ["i", "î", "ï", "í", "ī", "į", "ì"]
             e_filter = ["e", "è", "é", "ê", "ë", "ē", "ė", "ę"]
+=======
+            i_filter = ["i", "î", "ï", "í", "ī", "į", "ì", "1", "!"]
+            e_filter = ["e", "è", "é", "ê", "ë", "ē", "ė", "ę"]
+            o_filter = ["o", "ô", "ö", "ò", "ó", "œ", "ø", "ō", "õ"]
+            y_filter = ["y", "ÿ"]
+            u_filter = ["u", "û", "ü", "ù", "ú", "ū"]
+            s_filter = ["s", "ß", "ś", "š", "$"]
+            l_filter = ["l", "ł"]
+            z_filter = ["z", "ž", "ź", "ż"]
+            c_filter = ["c", "ç", "ć", "č"]
+>>>>>>> e84f37052d2416ac4cfdf0ab2d98d74ddcd18b2e
             n_filtered = []
             a_filtered = []
             i_filtered = []
             e_filtered = []
+<<<<<<< HEAD
+=======
+            o_filtered = []
+            y_filtered = []
+            u_filtered = []
+            s_filtered = []
+            l_filtered = []
+            z_filtered = []
+            c_filtered = []
+>>>>>>> e84f37052d2416ac4cfdf0ab2d98d74ddcd18b2e
             for n in n_filter:
                 n_filtered.append(string.replace("n", n))
             for item in n_filtered:
@@ -71,9 +97,34 @@ class AdminCog(commands.Cog, name="Admin Commands"):
             for item in i_filtered:
                 for e in e_filter:
                     e_filtered.append(item.replace("e", e))
+<<<<<<< HEAD
 
             return e_filtered
 
+=======
+            for item in e_filtered:
+                for o in o_filter:
+                    o_filtered.append(item.replace("o", o))
+            for item in o_filtered:
+                for y in y_filter:
+                    y_filtered.append(item.replace("y", y))
+            for item in y_filtered:
+                for u in u_filter:
+                    u_filtered.append(item.replace("u", u))
+            for item in u_filtered:
+                for s in s_filter:
+                    s_filtered.append(item.replace("s", s))
+            for item in s_filtered:
+                for l in l_filter:
+                    l_filtered.append(item.replace("l", l))
+            for item in l_filtered:
+                for z in z_filter:
+                    z_filtered.append(item.replace("z", z))
+            for item in z_filtered:
+                for c in c_filter:
+                    c_filtered.append(item.replace("c", c))
+            return c_filtered
+>>>>>>> e84f37052d2416ac4cfdf0ab2d98d74ddcd18b2e
         for string in filter_strings:
             big_bad_list.extend(filter_list(string))
         message = message.replace(" ", "")
