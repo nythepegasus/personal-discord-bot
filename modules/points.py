@@ -111,7 +111,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
             else:
                 amount_stolen = random.randint(25, 35)
             stolen_from["house_points"] -= amount_stolen
-            stealer["house_points"] += amount_stolen
+            stealing_house_name["house_points"] += amount_stolen
             await ctx.send(f'Your prefect found members of {stolen_from["house_name"]} fucking in the halls late at night.\nYour house stole {amount_stolen} points from their house!')
             json.dump(data, open(self.db_file, "w"), indent=4)
             return
@@ -120,7 +120,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
             if random.randint(1, 10) <= 4:
                 amount_lost = random.randint(25, 35)
             stolen_from["house_points"] += amount_lost
-            stealer["house_points"] -= amount_lost
+            stealing_house_name["house_points"] -= amount_lost
             await ctx.send(f'{stolen_from["house_name"]}\'s prefect found you bumbling about trying to spy on them. Your house gave them {amount_lost} points.')
             json.dump(data, open(self.db_file, "w"), indent=4)
             return
