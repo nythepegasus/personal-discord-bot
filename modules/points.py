@@ -97,14 +97,15 @@ class PointsCog(commands.Cog, name="Points Commands"):
             if house["house_name"].lower() == house_name.lower():
                 print("I ran, weirdly")
                 stolen_from = house
-        if stealer == stolen_from:
-            await ctx.send("Why're you trying to steal from yourself? You're lucky your prefect ain't rapin' your ass for that.")
-            return
-        else:
-            await ctx.send("Something maybe went right?.")
-            await ctx.send(f"Variables:")
-            await ctx.send(f"Stealer: {stealer}")
-            await ctx.send(f"Stolen from: {stolen_from}")
+                break
+            else:
+                await ctx.send("Why're you trying to steal from yourself? You're lucky your prefect ain't rapin' your ass for that.")
+                return
+        # else:
+        #     await ctx.send("Something maybe went right?.")
+        #     await ctx.send(f"Variables:")
+        #     await ctx.send(f"Stealer: {stealer}")
+        #     await ctx.send(f"Stolen from: {stolen_from}")
         if random.randint(1, 10) >= 7:
             if random.randint(1, 10) >= 8:
                 amount_stolen = random.randint(35, 45)
