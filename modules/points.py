@@ -81,17 +81,17 @@ class PointsCog(commands.Cog, name="Points Commands"):
 
     @commands.cooldown(1, 600, commands.BucketType.user)
     @commands.command()
-    async def steal(self, ctx):
+    async def steal(self, ctx, house_name):
         data = json.load(open(self.db_file))
         houses_steal_from = data["houses"].copy()
         print([y.name for y in ctx.author.roles])
         print(houses_steal_from)
-        print(ctx.message.content.lower())
+        print(house_name.lower())
         for house in houses_steal_from:
             if house["house_name"] in [y.name for y in ctx.author.roles]:
                 stealer = houses_steal_from.pop(houses_steal_from.index(house))
         for house in houses_steal_from:
-            if house["house_name"].lower() in ctx.message.content.lower():
+            if house["house_name"].lower() == house_name.lower():
                 stolen_from = house
             elif stealer == stolen_from:
                 await ctx.send("Why're you trying to steal from yourself? You're lucky your prefect ain't rapin' your ass for that.")
