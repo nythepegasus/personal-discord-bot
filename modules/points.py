@@ -84,9 +84,8 @@ class PointsCog(commands.Cog, name="Points Commands"):
     async def steal(self, ctx):
         data = json.load(open(self.db_file))
         houses_steal_from = data["houses"].copy()
-        print(ctx.author.roles)
         for house in houses_steal_from:
-            if house["house_name"] in ctx.author.roles:
+            if house["house_name"] in [y.name for y in ctx.author.roles]:
                 stealer = houses_steal_from.pop(houses_steal_from.index(house))
         for house in houses_steal_from:
             if house["house_name"].lower() in ctx.message.content.lower():
