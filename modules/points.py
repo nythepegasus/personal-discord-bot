@@ -50,7 +50,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
                     try:
                         house["house_points"] -= points_reducted
                         json.dump(data, open(self.db_file, "w"), indent=4)
-                        random_text = random.choice(json.load(open(self.random_phrases))["spell_texts"]["gain_texts"])
+                        random_text = random.choice(json.load(open(self.random_phrases))["spell_texts"]["lose_texts"])
                         emb = discord.Embed(
                             description=random_text["lose_text"].format(house=da_house, points_lost=points_reducted)
                         )
