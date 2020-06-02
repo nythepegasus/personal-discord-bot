@@ -69,7 +69,7 @@ class AdminCog(commands.Cog, name="Admin Commands"):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if any(bad in message.content for bad in self.tonys_a_cunt) or self.filter_message(message.content.lower()):
+        if any(bad in message.content for bad in self.tonys_a_cunt):
             await message.delete()
             dmchannel = await message.author.create_dm()
             await dmchannel.send("You're a cunt for trying that.")
