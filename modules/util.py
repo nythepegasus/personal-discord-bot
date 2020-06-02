@@ -119,8 +119,8 @@ class UtilCog(commands.Cog, name="Utility Commands"):
             raise error
 
     @commands.cooldown(1, 300, commands.BucketType.user)
-    @commands.command()
-    async def output_data_to_json_file(self, ctx):
+    @commands.command(aliases=["urp"])
+    async def update_random_phrases(self, ctx):
         scope = [
             "https://spreadsheets.google.com/feeds",
             'https://www.googleapis.com/auth/spreadsheets',
