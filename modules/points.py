@@ -9,6 +9,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
     def __init__(self, client):
         self.client = client
         self.db_file = 'points.json'
+        self.random_phrases = 'random_texts.json'
 
     @commands.command(aliases=["hp"])
     async def house_points(self, ctx):
@@ -38,35 +39,24 @@ class PointsCog(commands.Cog, name="Points Commands"):
                 try:
                     house["house_points"] += points_awarded
                     json.dump(data, open(self.db_file, "w"), indent=4)
-                    random_phrases_points_awarded = [
-                        f"You handled your rod quite well!\n{points_awarded} points awarded to {da_house}!",
-                        f"You sucked Umbridge's toes in whatever fucking class that bitch teaches.\n{da_house} gets {points_awarded} points, you fucking simp.",
-                        f"You found a chocolate frog.\n{points_awarded} points awarded to {da_house}!",
-                        f"You scored a banger goal in a Quidditch match and made the losing team cry like a bitch from your thick cock.\n{points_awarded} points to {da_house}!",
-                        f"Moaning Myrtle saw your bomb ass cock.\n{points_awarded} points to {da_house} for pimpin' the ghost bitch.",
-                        f"Your love potion turned out too well, now Snape's riding your cock.\n{points_awarded} points to {da_house}!",
-                        f"You found Hagrid's secret stash of Hermione's nudes. (Don't tell anyone)\n{da_house} earns {points_awarded}! (As long as you keep quiet, you lil fuck)",
-                        f"You smacked your prefect's ass for doing a good job. He gives you a thumbs up, smacks your ass, and winks at you.\n{points_awarded} points for {da_house}. (Someone's getting lucky tonight ;))",
-                        f"You called Ron a ginger virgin, and everyone laughed (r/thathappened). Fuck you, Ron.\n{points_awarded} points for {da_house}.",
-                        f"You got the mandrake to shut the fuck up (thank fuck).\n{points_awarded} points for {da_house}, you hero.",
-                        f"Nearly Headless Nick nearly gave you head.\n{da_house} gets {points_awarded} points, since you're a sick fuck who likes the quick fuck",
-                    ]
-                    await ctx.send(random.choice(random_phrases_points_awarded))
+                    random_text = random.choice(json.load(open(self.random_phrases))["spell_texts"]["gain_texts"])
+                    emb = discord.Embed(
+                        description=random_text["lose_text"].format(house=da_house, gain_text=points_awarded)
+                    )
+                    if len(random_text["author"]) != 0:
+                        emb.set_footer(f"Phrase provided from: {random_text['author']}")
+                    await ctx.send(emb)
                 except NameError:
                     try:
                         house["house_points"] -= points_reducted
                         json.dump(data, open(self.db_file, "w"), indent=4)
-                        random_phrases_points_reducted = [
-                            f"You angered Snape in potions class.\n{points_reducted} points taken from {da_house}.",
-                            f"You pronounced a spell wrong, it's pronounced levi*o*sa.\n{points_reducted} points taken from {da_house}.",
-                            f"You fell up the stairs, you fucking idiot.\n{points_reducted} points taken from {da_house}.",
-                            f"You fell down 10 flights on the Grand Staircase and broke 24 bones and are now hospitalized for a week.\n\nOh, and {da_house} loses {points_reducted} points. Nice goin'",
-                            f"Voldemort smote the school because you made fun of his not nose. Way to go, dickhead.\n{da_house} loses {points_reducted} points. (You should feel bad, sick fuck).",
-                            f"You got wasted on nonalcoholic butterbeer like an underaged cuck, and started a petty brawl.\n{points_reducted} points from {da_house}.",
-                            f"You creeped out Hagrid with your weird ass fanfiction about his giant furcock.\n{da_house} loses {points_reducted} points.",
-                            f"You let the Cornish Pixies escape from their cage and they wreaked havoc around the school. Good job, dumbass.\n{da_house} loses {points_reducted} points because of your dumbassery.",
-                        ]
-                        await ctx.send(random.choice(random_phrases_points_reducted))
+                        random_text = random.choice(json.load(open(self.random_phrases))["spell_texts"]["gain_texts"])
+                        emb = discord.Embed(
+                            description=random_text["lose_text"].format(house=da_house, points_lost=points_reducted)
+                        )
+                        if len(random_text["author"]) != 0:
+                            emb.set_footer(f"Phrase provided from: {random_text['author']}")
+                        await ctx.send(emb)
                     except NameError:
                         await ctx.send("Something went terribly, terribly wrong. Please tell <@195864152856723456> to fix his jank shit.")
             else:
@@ -101,7 +91,13 @@ class PointsCog(commands.Cog, name="Points Commands"):
                 amount_stolen = random.randint(25, 35)
             stolen_from["house_points"] -= amount_stolen
             stealing_house_name["house_points"] += amount_stolen
-            await ctx.send(f'Your prefect found members of {stolen_from["house_name"]} fucking in the halls late at night.\nYour house stole {amount_stolen} points from their house!')
+            random_text = random.choice(json.load(open(self.random_phrases))["steal_texts"]["gain_texts"])
+            emb = discord.Embed(
+                description=random_text["gain_text"].format(house=stolen_from["house_name"], points_stolen=amount_stolen)
+            )
+            if len(random_text["author"]) != 0:
+                emb.set_footer(f"Phrase provided from: {random_text['author']}")
+            await ctx.send(emb)
             json.dump(data, open(self.db_file, "w"), indent=4)
             return
         else:
@@ -110,7 +106,13 @@ class PointsCog(commands.Cog, name="Points Commands"):
                 amount_lost = random.randint(25, 35)
             stolen_from["house_points"] += amount_lost
             stealing_house_name["house_points"] -= amount_lost
-            await ctx.send(f'{stolen_from["house_name"]}\'s prefect found you bumbling about trying to spy on them. Your house gave them {amount_lost} points.')
+            random_text = random.choice(json.load(open(self.random_phrases))["steal_texts"]["lose_texts"])
+            emb = discord.Embed(
+                description=random_text["lose_text"].format(house=stolen_from["house_name"], points_lost=amount_lost)
+            )
+            if len(random_text["author"]) != 0:
+                emb.set_footer(f"Phrase provided from: {random_text['author']}")
+            await ctx.send(emb)
             json.dump(data, open(self.db_file, "w"), indent=4)
             return
 
@@ -149,10 +151,21 @@ class PointsCog(commands.Cog, name="Points Commands"):
                 pass
         if random.randint(1, 10) >= 5:
             points_awarded = random.randint(40, 70)
-            await ctx.send(f"Dumbledore seems very pleased with how you sucked his cock.\n{da_house['house_name']} earns {points_awarded} points for your awesome head skills!")
+            random_text = random.choice(json.load(open(self.random_phrases))["beg_texts"]["big_gain_texts"])
+            emb = discord.Embed(
+                description = random_text["big_gain_text"].format(house=da_house["house_name"], points_gained=points_awarded)
+            )
+            if len(random_text["author"]) != 0:
+                emb.set_footer(f"Phrase provided from: {random_text['author']}")
+            await ctx.send(emb)
         else:
-            points_awarded = random.randint(25, 35)
-            await ctx.send(f"Dumbledore is somewhat okay with how you gave head. Just uh, use less teeth next time, got it?\n{points_awarded} points to {da_house['house_name']}.")
+            random_text = random.choice(json.load(open(self.random_phrases))["beg_texts"]["gain_texts"])
+            emb = discord.Embed(
+                description = random_text["gain_text"].format(house=da_house["house_name"], points_gained=points_awarded)
+            )
+            if len(random_text["author"]) != 0:
+                emb.set_footer(f"Phrase provided from: {random_text['author']}")
+            await ctx.send(emb)
         da_house["house_points"] += points_awarded
         json.dump(data, open(self.db_file, "w"), indent=4)
 
