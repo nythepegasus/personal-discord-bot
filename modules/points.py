@@ -41,7 +41,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
                     json.dump(data, open(self.db_file, "w"), indent=4)
                     random_text = random.choice(json.load(open(self.random_phrases))["spell_texts"]["gain_texts"])
                     emb = discord.Embed(
-                        description=random_text["lose_text"].format(house=da_house, gain_text=points_awarded)
+                        description=random_text["gain_text"].format(house=da_house, gain_text=points_awarded)
                     )
                     if len(random_text["author"]) != 0:
                         emb.set_footer(f"Phrase provided from: {random_text['author']}")
