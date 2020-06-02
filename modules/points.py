@@ -44,7 +44,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
                         description=random_text["gain_text"].format(house=da_house, gain_text=points_awarded)
                     )
                     if len(random_text["author"]) != 0:
-                        emb.set_footer(f"Phrase provided from: {random_text['author']}")
+                        emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
                     await ctx.send(emb)
                 except NameError:
                     try:
