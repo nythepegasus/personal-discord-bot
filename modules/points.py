@@ -151,7 +151,6 @@ class PointsCog(commands.Cog, name="Points Commands"):
             }
             data["timeouts"].append(person_timeout)
             json.dump(data, open(self.db_file, "w"), indent=4)
-        await ctx.send("You hear a zip sound come from under Dumbledore's robes..")
         for house in data["houses"]:
             if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
                 da_house = house
@@ -169,6 +168,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
                 emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
             await ctx.send(embed=emb)
         else:
+            points_awarded = random.randint(25, 35)
             random_text = random.choice(json.load(open(self.random_phrases))["beg_texts"]["gain_texts"])
             emb = discord.Embed(
                 title="Begging",
