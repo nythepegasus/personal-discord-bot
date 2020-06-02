@@ -133,6 +133,7 @@ class UtilCog(commands.Cog, name="Utility Commands"):
         data = sheet.get_all_values()
         data.pop(0)
         for row in data:
+            print(row)
             json_data = json.load(open("random_texts.json"))
             row.pop(0)  # Clean by getting rid of the timestamp
             while("" in row):
