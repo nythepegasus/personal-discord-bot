@@ -41,6 +41,8 @@ class PointsCog(commands.Cog, name="Points Commands"):
                     json.dump(data, open(self.db_file, "w"), indent=4)
                     random_text = random.choice(json.load(open(self.random_phrases))["spell_texts"]["gain_texts"])
                     emb = discord.Embed(
+                        title="Casting Spell",
+                        colour=0x00adff,
                         description=random_text["gain_text"].format(house=da_house, points_gained=points_awarded)
                     )
                     if len(random_text["author"]) != 0:
@@ -52,6 +54,8 @@ class PointsCog(commands.Cog, name="Points Commands"):
                         json.dump(data, open(self.db_file, "w"), indent=4)
                         random_text = random.choice(json.load(open(self.random_phrases))["spell_texts"]["lose_texts"])
                         emb = discord.Embed(
+                            title="Casting Spell",
+                            colour=0x00adff,
                             description=random_text["lose_text"].format(house=da_house, points_lost=points_reducted)
                         )
                         if len(random_text["author"]) != 0:
@@ -93,6 +97,8 @@ class PointsCog(commands.Cog, name="Points Commands"):
             stealing_house_name["house_points"] += amount_stolen
             random_text = random.choice(json.load(open(self.random_phrases))["steal_texts"]["gain_texts"])
             emb = discord.Embed(
+                title="Stealing",
+                colour=0x00adff,
                 description=random_text["gain_text"].format(house=stolen_from["house_name"], points_stolen=amount_stolen)
             )
             if len(random_text["author"]) != 0:
@@ -108,6 +114,8 @@ class PointsCog(commands.Cog, name="Points Commands"):
             stealing_house_name["house_points"] -= amount_lost
             random_text = random.choice(json.load(open(self.random_phrases))["steal_texts"]["lose_texts"])
             emb = discord.Embed(
+                title="Stealing",
+                colour=0x00adff,
                 description=random_text["lose_text"].format(house=stolen_from["house_name"], points_lost=amount_lost)
             )
             if len(random_text["author"]) != 0:
@@ -153,6 +161,8 @@ class PointsCog(commands.Cog, name="Points Commands"):
             points_awarded = random.randint(40, 70)
             random_text = random.choice(json.load(open(self.random_phrases))["beg_texts"]["big_gain_texts"])
             emb = discord.Embed(
+                title="Begging",
+                colour=0x00adff,
                 description = random_text["big_gain_text"].format(house=da_house["house_name"], points_gained=points_awarded)
             )
             if len(random_text["author"]) != 0:
@@ -161,6 +171,8 @@ class PointsCog(commands.Cog, name="Points Commands"):
         else:
             random_text = random.choice(json.load(open(self.random_phrases))["beg_texts"]["gain_texts"])
             emb = discord.Embed(
+                title="Begging",
+                colour=0x00adff,
                 description = random_text["gain_text"].format(house=da_house["house_name"], points_gained=points_awarded)
             )
             if len(random_text["author"]) != 0:
