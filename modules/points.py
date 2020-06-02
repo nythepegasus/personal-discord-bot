@@ -45,7 +45,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
                     )
                     if len(random_text["author"]) != 0:
                         emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
-                    await ctx.send(emb)
+                    await ctx.send(embed=emb)
                 except NameError:
                     try:
                         house["house_points"] -= points_reducted
@@ -56,7 +56,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
                         )
                         if len(random_text["author"]) != 0:
                             emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
-                        await ctx.send(emb)
+                        await ctx.send(embed=emb)
                     except NameError:
                         await ctx.send("Something went terribly, terribly wrong. Please tell <@195864152856723456> to fix his jank shit.")
             else:
@@ -97,7 +97,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
             )
             if len(random_text["author"]) != 0:
                 emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
-            await ctx.send(emb)
+            await ctx.send(embed=emb)
             json.dump(data, open(self.db_file, "w"), indent=4)
             return
         else:
@@ -112,7 +112,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
             )
             if len(random_text["author"]) != 0:
                 emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
-            await ctx.send(emb)
+            await ctx.send(embed=emb)
             json.dump(data, open(self.db_file, "w"), indent=4)
             return
 
@@ -157,7 +157,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
             )
             if len(random_text["author"]) != 0:
                 emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
-            await ctx.send(emb)
+            await ctx.send(embed=emb)
         else:
             random_text = random.choice(json.load(open(self.random_phrases))["beg_texts"]["gain_texts"])
             emb = discord.Embed(
@@ -165,7 +165,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
             )
             if len(random_text["author"]) != 0:
                 emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
-            await ctx.send(emb)
+            await ctx.send(embed=emb)
         da_house["house_points"] += points_awarded
         json.dump(data, open(self.db_file, "w"), indent=4)
 
