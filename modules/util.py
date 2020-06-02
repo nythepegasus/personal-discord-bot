@@ -1,5 +1,6 @@
-import psutil, subprocess, time, datetime, speedtest, discord
+import psutil, subprocess, time, datetime, speedtest, discord, gspread, json
 from discord.ext import commands
+from oauth2client.service_account import ServiceAccountCredentials
 
 
 class UtilCog(commands.Cog, name="Utility Commands"):
@@ -116,6 +117,52 @@ class UtilCog(commands.Cog, name="Utility Commands"):
             await ctx.send(f"Wait {round(error.retry_after, 2)} more seconds.")
         else:
             raise error
+
+    @commands.cooldown(1, 300, commands.BucketType.user)
+    @commands.command()
+    async def output_data_to_json_file(self, ctx):
+        scope = [
+            "https://spreadsheets.google.com/feeds",
+            'https://www.googleapis.com/auth/spreadsheets',
+            "https://www.googleapis.com/auth/drive.file",
+            "https://www.googleapis.com/auth/drive"
+        ]
+        creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
+        client = gspread.authorize(creds)
+        sheet = client.open("Discord Bot Stuffs").sheet1
+        data = sheet.get_all_values()
+        data.pop(0)
+        for row in data:
+            json_data = json.load(open("random_texts.json"))
+            row.pop(0)  # Clean by getting rid of the timestamp
+            while("" in row):
+                row.remove("")  # Get rid of all empty things, which cleans up selecting things too
+            if row[0] == "":
+                continue
+            if len(row) == 4:
+                author = row[3]
+            else:
+                author = ""
+            if row[2] in open("random_texts.json").read():
+                continue
+            if row[0] == "Spell text.":
+                if row[1] == "Gain":
+                    json_data["spell_texts"]["gain_texts"].append({"gain_text": row[2], "author": author})
+                else:
+                    json_data["spell_texts"]["lose_texts"].append({"lose_text": row[2], "author": author})
+            elif row[0] == "Steal text.":
+                if row[1] == "Gain":
+                    json_data["steal_texts"]["gain_texts"].append({"gain_text": row[2], "author": author})
+                else:
+                    json_data["steal_texts"]["lose_texts"].append({"lose_text": row[2], "author": author})
+            elif row[0] == "Beg text.":
+                if row[1] == "Gain":
+                    json_data["beg_texts"]["gain_texts"].append({"gain_text": row[2], "author": author})
+                else:
+                    json_data["beg_texts"]["big_gain_texts"].append({"big_gain_text": row[2], "author": author})
+            json.dump(json_data, open("random_texts.json", "w"), indent=4)
+        await ctx.send("Phrases updated! Hopefully you see yours soon ;)")
+
 
 
 def setup(client):
