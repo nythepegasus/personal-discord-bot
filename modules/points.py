@@ -55,7 +55,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
                             description=random_text["lose_text"].format(house=da_house, points_lost=points_reducted)
                         )
                         if len(random_text["author"]) != 0:
-                            emb.set_footer(f"Phrase provided from: {random_text['author']}")
+                            emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
                         await ctx.send(emb)
                     except NameError:
                         await ctx.send("Something went terribly, terribly wrong. Please tell <@195864152856723456> to fix his jank shit.")
@@ -96,7 +96,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
                 description=random_text["gain_text"].format(house=stolen_from["house_name"], points_stolen=amount_stolen)
             )
             if len(random_text["author"]) != 0:
-                emb.set_footer(f"Phrase provided from: {random_text['author']}")
+                emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
             await ctx.send(emb)
             json.dump(data, open(self.db_file, "w"), indent=4)
             return
@@ -111,7 +111,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
                 description=random_text["lose_text"].format(house=stolen_from["house_name"], points_lost=amount_lost)
             )
             if len(random_text["author"]) != 0:
-                emb.set_footer(f"Phrase provided from: {random_text['author']}")
+                emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
             await ctx.send(emb)
             json.dump(data, open(self.db_file, "w"), indent=4)
             return
@@ -156,7 +156,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
                 description = random_text["big_gain_text"].format(house=da_house["house_name"], points_gained=points_awarded)
             )
             if len(random_text["author"]) != 0:
-                emb.set_footer(f"Phrase provided from: {random_text['author']}")
+                emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
             await ctx.send(emb)
         else:
             random_text = random.choice(json.load(open(self.random_phrases))["beg_texts"]["gain_texts"])
@@ -164,7 +164,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
                 description = random_text["gain_text"].format(house=da_house["house_name"], points_gained=points_awarded)
             )
             if len(random_text["author"]) != 0:
-                emb.set_footer(f"Phrase provided from: {random_text['author']}")
+                emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
             await ctx.send(emb)
         da_house["house_points"] += points_awarded
         json.dump(data, open(self.db_file, "w"), indent=4)
