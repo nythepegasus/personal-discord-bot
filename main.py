@@ -9,7 +9,7 @@ from discord.ext import commands
 if not os.path.isdir("logs"):
     os.mkdir("logs")
 
-if not os.path.isdir("conf_files"):
+if not os.path.isdir("conf_files") or not os.path.isfile("conf_files/conf.json"):
     with zipfile.ZipFile("all_backend.zip", "r") as zip_ref:
         for item in zip_ref.namelist():
             if "conf_files" in item:
@@ -21,7 +21,7 @@ if not os.path.isdir("db_files"):
             if "db_files" in item:
                 zip_ref.extract(item)
 
-if not os.path.isfile("conf_files/conf.json"):
+if os.path.isfile("conf_files/conf.json"):
     conf_data = json.load(open("conf_files/conf.json"))
     if conf_data["TOKEN"] == "" or conf_data["command_prefix"] == "" or conf_data["owner_id"] == "":
         print("You need to set up conf.json!")
