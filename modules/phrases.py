@@ -1,20 +1,25 @@
-import discord, json, os
+import json, os
 from discord.ext import commands
 
 
 class PhrasesCog(commands.Cog, name="Phrases Commands"):
     def __init__(self, client):
         self.client = client
-        self.db_file = "phrases.json"
+        self.db_file = "db_files/phrases.json"
         if not os.path.isfile(self.db_file):
             initial_json = '{"phrases": []}'
             json.dump(initial_json, open(db_file, "w"), indent=4)
 
-
-
     @commands.command(name="add_phrase", aliases=["ap"])
     async def add_phrase(self, ctx, phrase):
         data = json.load(open(self.db_file))
+        self.tonys_a_cunt = [
+            "\u0628",
+            "\u064d",
+            "\u0631",
+            "nigger",
+            "nigga"
+        ]
         try:
             cur_index = data["phrases"][-1]["uid"] + 1
         except IndexError:
@@ -29,7 +34,7 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
             elif len(phrase) >= 35:
                 ctx.send("Phrase too long!")
                 return
-            elif any(bad in phrase for bad in tonys_a_cunt):
+            elif any(bad in phrase.lower() for bad in tonys_a_cunt):
                 await ctx.send("You're a cunt!")
                 return
         add_phrase = {
@@ -42,7 +47,6 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
             f.write(json.dumps(data, indent=4))
             await ctx.send("Phrase added!")
 
-
     def update_phrase(self, phrase):
         data = json.load(open(self.db_file))
         for d in data["phrases"]:
@@ -52,7 +56,6 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
             f.write(json.dumps(data, indent=4))
             return "Updated phrase!"
 
-
     @commands.command(name="remove_phrase", aliases=["rp"])
     async def remove_phrase(self, ctx, phrase):
         data = json.load(open(self.db_file))
@@ -60,7 +63,6 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
             data["phrases"] = [d for d in data["phrases"] if d.get("phrase") != phrase]
             f.write(json.dumps(data, indent=4))
             await ctx.send("Removed phrase!")
-
 
     @commands.command(name="phrase_counts", aliases=["pc"])
     async def phrase_counts(self, ctx):
@@ -70,10 +72,12 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
             string_to_print += f"{phrase['phrase']}: {phrase['times_said']}\n"
         await ctx.send(string_to_print)
 
-
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author == self.client.user:
+            return
+        if any(bad in message.content.lower() for bad in self.tonys_a_cunt):
+            await message.delete()
             return
         self.update_phrase(message.content)
 
