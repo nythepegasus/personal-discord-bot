@@ -8,8 +8,8 @@ from discord.ext import commands
 class PointsCog(commands.Cog, name="Points Commands"):
     def __init__(self, client):
         self.client = client
-        self.db_file = 'points.json'
-        self.random_phrases = 'random_texts.json'
+        self.db_file = 'db_files/points.json'
+        self.random_phrases = 'db_files/random_texts.json'
 
     @commands.command(aliases=["hp"])
     async def house_points(self, ctx):
