@@ -8,11 +8,7 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
         self.db_file = "db_files/phrases.json"
         if not os.path.isfile(self.db_file):
             initial_json = '{"phrases": []}'
-            json.dump(initial_json, open(db_file, "w"), indent=4)
-
-    @commands.command(name="add_phrase", aliases=["ap"])
-    async def add_phrase(self, ctx, phrase):
-        data = json.load(open(self.db_file))
+            json.dump(initial_json, open(db_file, "w"), indent=4) # I need to fix first time runs, bleghhh
         self.tonys_a_cunt = [
             "\u0628",
             "\u064d",
@@ -20,6 +16,10 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
             "nigger",
             "nigga"
         ]
+
+    @commands.command(name="add_phrase", aliases=["ap"])
+    async def add_phrase(self, ctx, phrase):
+        data = json.load(open(self.db_file))
         try:
             cur_index = data["phrases"][-1]["uid"] + 1
         except IndexError:
