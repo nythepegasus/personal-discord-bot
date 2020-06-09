@@ -34,7 +34,7 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
             elif len(phrase) >= 35:
                 ctx.send("Phrase too long!")
                 return
-            elif any(bad in phrase.lower() for bad in tonys_a_cunt):
+            elif any(bad in phrase.lower() for bad in self.tonys_a_cunt):
                 await ctx.send("You're a cunt!")
                 return
         add_phrase = {
