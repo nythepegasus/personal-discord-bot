@@ -3,4 +3,4 @@ __pycache__
 test.py
 *.old
 TODO.md
-*.logs
+*.log
