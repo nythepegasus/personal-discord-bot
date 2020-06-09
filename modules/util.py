@@ -1,4 +1,4 @@
-import psutil, subprocess, time, datetime, speedtest, discord, gspread, json, logging
+import os, psutil, subprocess, time, datetime, speedtest, discord, gspread, json, logging
 from discord.ext import commands
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -121,6 +121,9 @@ class UtilCog(commands.Cog, name="Utility Commands"):
     @commands.command(aliases=["urp"])
     async def update_random_phrases(self, ctx):
         logging.basicConfig(filename='logs/gsheets.log', level=logging.WARNING)
+        if not os.path.isfile("conf_files/creds.json"):
+            logging.warning("creds.json file doesn't exist! Cannot run update_random_phrases command.")
+            return
         scope = [
             "https://spreadsheets.google.com/feeds",
             'https://www.googleapis.com/auth/spreadsheets',
