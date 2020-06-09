@@ -6,9 +6,6 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
     def __init__(self, client):
         self.client = client
         self.db_file = "db_files/phrases.json"
-        if not os.path.isfile(self.db_file):
-            initial_json = '{"phrases": []}'
-            json.dump(initial_json, open(db_file, "w"), indent=4) # I need to fix first time runs, bleghhh
         self.tonys_a_cunt = [
             "\u0628",
             "\u064d",
