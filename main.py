@@ -21,7 +21,7 @@ if not os.path.isdir("db_files"):
             if "db_files" in item:
                 zip_ref.extract(item)
 
-if os.path.isfile("conf_files/conf.json"):
+if not os.path.isfile("conf_files/conf.json"):
     conf_data = json.load(open("conf_files/conf.json"))
     if conf_data["TOKEN"] == "" or conf_data["command_prefix"] == "" or conf_data["owner_id"] == "":
         print("You need to set up conf.json!")
