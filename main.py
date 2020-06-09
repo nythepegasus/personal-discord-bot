@@ -3,12 +3,6 @@ import traceback
 import discord
 from discord.ext import commands
 
-
-"""
-Start of the variables and such for the backend.
-"""
-
-
 TOKEN = "NTIxNTUwNzIyMzU0MTE4NjY2.Xs6qQQ.Ngcld6mD4Ip6CzkCz_mjLu8Nf-E"
 client = commands.Bot(command_prefix="buh!")
 client.owner_id = 195864152856723456
@@ -21,12 +15,6 @@ initial_extensions = [
             "modules.util"
 ]
 
-
-"""
-Start of importing cogs.
-"""
-
-
 for extension in initial_extensions:
     try:
         client.load_extension(extension)
@@ -37,17 +25,11 @@ for extension in initial_extensions:
         traceback.print_exc()
 
 
-"""
-Starting the events, such as messages and pins.
-"""
-
-
 @client.event
 async def on_ready():
     funny_activity = discord.Game(name="with my 3 inch thick yogurt slinger")
     await client.change_presence(activity=funny_activity)
     for guild in client.guilds:
         print(f"Tester in {guild}")
-
 
 client.run(TOKEN)
