@@ -26,13 +26,13 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
             cur_index = 1
         for line in data["phrases"]:
             if phrase == line["phrase"]:
-                ctx.send("Phrase already exists!")
+                await ctx.send("Phrase already exists!")
                 return
             elif len(phrase) <= 2:
-                ctx.send("Phrase too short!")
+                await ctx.send("Phrase too short!")
                 return
             elif len(phrase) >= 35:
-                ctx.send("Phrase too long!")
+                await ctx.send("Phrase too long!")
                 return
             elif any(bad in phrase.lower() for bad in self.tonys_a_cunt):
                 await ctx.send("You're a cunt!")
