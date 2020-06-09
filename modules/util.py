@@ -120,7 +120,7 @@ class UtilCog(commands.Cog, name="Utility Commands"):
     @commands.cooldown(1, 300, commands.BucketType.user)
     @commands.command(aliases=["urp"])
     async def update_random_phrases(self, ctx):
-        logging.basicConfig(filename='../../logs/gsheets.log', level=logging.DEBUG)
+        logging.basicConfig(filename='logs/gsheets.log', level=logging.DEBUG)
         scope = [
             "https://spreadsheets.google.com/feeds",
             'https://www.googleapis.com/auth/spreadsheets',
