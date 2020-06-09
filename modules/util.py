@@ -127,13 +127,13 @@ class UtilCog(commands.Cog, name="Utility Commands"):
             "https://www.googleapis.com/auth/drive.file",
             "https://www.googleapis.com/auth/drive"
         ]
-        creds = ServiceAccountCredentials.from_json_keyfile_name("creds.json", scope)
+        creds = ServiceAccountCredentials.from_json_keyfile_name("conf_files/creds.json", scope)
         client = gspread.authorize(creds)
         sheet = client.open("Discord Bot Stuffs").sheet1
         data = sheet.get_all_values()
         data.pop(0)
         for row in data:
-            json_data = json.load(open("random_texts.json"))
+            json_data = json.load(open("db_files/random_texts.json"))
             row.pop(0)  # Clean by getting rid of the timestamp
             while("" in row):
                 row.remove("")  # Get rid of all empty things, which cleans up selecting things too
@@ -171,7 +171,7 @@ class UtilCog(commands.Cog, name="Utility Commands"):
                     json_data["steal_texts"]["lose_texts"].append({"lose_text": row[2], "author": author})
 
             json_data["all_phrases"].append(row[2])
-            json.dump(json_data, open("random_texts.json", "w"), indent=4)
+            json.dump(json_data, open("db_files/random_texts.json", "w"), indent=4)
         await ctx.send("Phrases updated! Hopefully you see yours soon ;)")
 
 
