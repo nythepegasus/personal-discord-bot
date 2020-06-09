@@ -4,4 +4,4 @@ test.py
 *.old
 TODO.md
 *.log
-.idea
+.idea/
