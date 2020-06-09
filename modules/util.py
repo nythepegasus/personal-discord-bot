@@ -145,8 +145,6 @@ class UtilCog(commands.Cog, name="Utility Commands"):
                 author = ""
             if row[2] in json_data["all_phrases"]:
                 continue
-            else:
-                print(row[2])
             if row[1] == "Gain" or row[1] == "Big Gain":
                 try:
                     row[2].format(house="Test", points="Test")
