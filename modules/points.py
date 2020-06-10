@@ -168,7 +168,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
                 emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
             await ctx.send(embed=emb)
         else:
-            if random.randint(1, 10) >= 2:
+            if random.randint(1, 10) <= 2:
                 points_awarded = 150
                 emb = discord.Embed(title="**HOLY FUCKING SHIT!**", colour=0x00adff, description="Your luck just fuckin' turned around, bucko. You just gained {} points for {}.".format(points_awarded, da_house["house_name"]))
                 emb.set_footer(text="From Dumbledore's Grace")
