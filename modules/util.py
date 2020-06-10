@@ -1,4 +1,4 @@
-import os, psutil, subprocess, time, datetime, speedtest, discord, gspread, json, logging
+import os, psutil, subprocess, time, datetime, speedtest, discord, gspread, json, logging, zipfile
 from discord.ext import commands
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -124,6 +124,9 @@ class UtilCog(commands.Cog, name="Utility Commands"):
         if not os.path.isfile("conf_files/creds.json"):
             logging.warning("creds.json file doesn't exist! Cannot run update_random_phrases command.")
             return
+        os.remove("db_files/random_texts.json")
+        with zipfile.ZipFile("all_backend.zip", "r") as zip_ref:
+            zip_ref.extract("db_files/random_texts.json")
         scope = [
             "https://spreadsheets.google.com/feeds",
             'https://www.googleapis.com/auth/spreadsheets',

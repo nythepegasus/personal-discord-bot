@@ -24,3 +24,4 @@ speedtest-cli==2.1.2
 urllib3==1.25.9
 websockets==8.1
 yarl==1.4.2
+google-api-python-client==1.8.4
