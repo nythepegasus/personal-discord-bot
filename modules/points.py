@@ -168,16 +168,22 @@ class PointsCog(commands.Cog, name="Points Commands"):
                 emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
             await ctx.send(embed=emb)
         else:
-            points_awarded = random.randint(25, 35)
-            random_text = random.choice(json.load(open(self.random_phrases))["beg_texts"]["gain_texts"])
-            emb = discord.Embed(
-                title="Begging",
-                colour=0x00adff,
-                description = random_text["gain_text"].format(house=da_house["house_name"], points=points_awarded)
-            )
-            if len(random_text["author"]) != 0:
-                emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
-            await ctx.send(embed=emb)
+            if random.randint(1, 10) >= 2:
+                points_awarded = 150
+                emb = discord.Embed(title="**HOLY FUCKING SHIT!**", colour=0x00adff, description="Your luck just fuckin' turned around, bucko. You just gained {} points for {house}.".format(points_awarded, da_house["house_name"]))
+                emb.set_footer(text="From Dumbledore's Grace")
+                await ctx.send(embed=emb)
+            else:
+                points_awarded = random.randint(25, 35)
+                random_text = random.choice(json.load(open(self.random_phrases))["beg_texts"]["gain_texts"])
+                emb = discord.Embed(
+                    title="Begging",
+                    colour=0x00adff,
+                    description = random_text["gain_text"].format(house=da_house["house_name"], points=points_awarded)
+                )
+                if len(random_text["author"]) != 0:
+                    emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
+                await ctx.send(embed=emb)
         da_house["house_points"] += points_awarded
         json.dump(data, open(self.db_file, "w"), indent=4)
 
