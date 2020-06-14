@@ -25,12 +25,12 @@ class UtilCog(commands.Cog, name="Utility Commands"):
 
 
     @commands.command(name="archive_pins", aliases=["arcp"])
+    @commands.is_owner()
     async def archive_pins(self, ctx):
         guild = self.client.guilds[0]
         for channel in guild.channels:
             if channel.name == "general":
                 general_chat = channel
-        for channel in guild.channels:
             if channel.name == "archived-pins":
                 archive_channel = channel
         myPins = await general_chat.pins()
@@ -51,7 +51,7 @@ class UtilCog(commands.Cog, name="Utility Commands"):
                 if len(pin.attachments) > 1:
                     img_url = pin.attachments[0].url
                     emb.set_image(url=img_url)
-                    emb.set_footer(text=f"Part 1 | Archived from #{pin.channel}")
+                    emb.set_footer(text=f"Part 1 | Archived from #{pin.channel} | {pin.jump_url}")
                     await archive_channel.send(embed=emb)
                     attach_counter = 1
                     try:
