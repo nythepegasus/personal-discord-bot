@@ -6,7 +6,7 @@ from discord.ext import commands
 
 
 class PointsCog(commands.Cog, name="Points Commands"):
-    def __init__(self, client):
+    def __init__(self, client: "Bot client"):
         self.client = client
         self.db_file = 'db_files/points.json'
         self.random_phrases = 'db_files/random_texts.json'
@@ -23,55 +23,33 @@ class PointsCog(commands.Cog, name="Points Commands"):
     @commands.command(aliases=["cs"])
     async def cast_spell(self, ctx):
         data = json.load(open(self.db_file))
-        if random.randint(1, 10) >= 6:
-            if random.randint(1, 10) >= 8:
-                points_awarded = random.randint(10, 20)
+        if random.randint(1, 10) >= 5:
+            if random.randint(1, 10) >= 5:
+                points_changed = random.randint(10, 20)
             else:
-                points_awarded = random.randint(3, 10)
+                points_changed = random.randint(3, 10)
         else:
             if random.randint(1, 10) <= 8:
-                points_reducted = random.randint(3, 10)
+                points_changed = random.randint(-10, -3)
             else:
-                points_reducted = random.randint(20, 25)
+                points_changed = random.randint(-25, -20)
         for house in data["houses"]:
             if house["house_name"].lower() in [y.name.lower() for y in ctx.author.roles]:
                 da_house = house["house_name"]
-                try:
-                    house["house_points"] += points_awarded
-                    json.dump(data, open(self.db_file, "w"), indent=4)
+                house["house_points"] += points_changed
+                json.dump(data, open(self.db_file, "w"), indent=4)
+                emb = discord.Embed(title="Casting Spell", colour=0x00adff)
+                if points_changed > 0:
                     random_text = random.choice(json.load(open(self.random_phrases))["spell_texts"]["gain_texts"])
-                    emb = discord.Embed(
-                        title="Casting Spell",
-                        colour=0x00adff,
-                        description=random_text["gain_text"].format(house=da_house, points=points_awarded)
-                    )
-                    if len(random_text["author"]) != 0:
-                        emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
-                    await ctx.send(embed=emb)
-                except NameError:
-                    try:
-                        house["house_points"] -= points_reducted
-                        json.dump(data, open(self.db_file, "w"), indent=4)
-                        random_text = random.choice(json.load(open(self.random_phrases))["spell_texts"]["lose_texts"])
-                        emb = discord.Embed(
-                            title="Casting Spell",
-                            colour=0x00adff,
-                            description=random_text["lose_text"].format(house=da_house, points=points_reducted)
-                        )
-                        if len(random_text["author"]) != 0:
-                            emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
-                        await ctx.send(embed=emb)
-                    except NameError:
-                        await ctx.send("Something went terribly, terribly wrong. Please tell <@195864152856723456> to fix his jank shit.")
-            else:
-                pass
-
-    @cast_spell.error
-    async def cast_spell_erorr(self, ctx, error):
-        if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(f"You're a little tired from your last fiasco. Wait {round(error.retry_after, 2)} seconds to try again.")
-        else:
-            raise error
+                    emb.description = random_text["gain_text"].format(house=da_house, points=abs(points_changed))
+                else:
+                    random_text = random.choice(json.load(open(self.random_phrases))["spell_texts"]["lose_texts"])
+                    emb.description = random_text["lose_text"].format(house=da_house, points=abs(points_changed))
+                if len(random_text["author"]) != 0:
+                    emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
+                await ctx.send(embed=emb)
+                return
+        await ctx.send("You should have a Hogwarts role before you run this command!")
 
     @commands.cooldown(1, 600, commands.BucketType.user)
     @commands.command()
@@ -89,47 +67,27 @@ class PointsCog(commands.Cog, name="Points Commands"):
             await ctx.send("Why're you trying to steal from yourself? You're lucky your prefect ain't rapin' your ass for that.")
             return
         if random.randint(1, 10) >= 7:
+            amount_changed = random.randint(25, 35)
             if random.randint(1, 10) >= 8:
-                amount_stolen = random.randint(35, 45)
-            else:
-                amount_stolen = random.randint(25, 35)
-            stolen_from["house_points"] -= amount_stolen
-            stealing_house_name["house_points"] += amount_stolen
-            random_text = random.choice(json.load(open(self.random_phrases))["steal_texts"]["gain_texts"])
-            emb = discord.Embed(
-                title="Stealing",
-                colour=0x00adff,
-                description=random_text["gain_text"].format(house=stolen_from["house_name"], points=amount_stolen)
-            )
-            if len(random_text["author"]) != 0:
-                emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
-            await ctx.send(embed=emb)
-            json.dump(data, open(self.db_file, "w"), indent=4)
-            return
+                amount_changed = random.randint(35, 45)
         else:
-            amount_lost = random.randint(15, 20)
+            amount_changed = random.randint(-20, -15)
             if random.randint(1, 10) <= 4:
-                amount_lost = random.randint(25, 35)
-            stolen_from["house_points"] += amount_lost
-            stealing_house_name["house_points"] -= amount_lost
-            random_text = random.choice(json.load(open(self.random_phrases))["steal_texts"]["lose_texts"])
-            emb = discord.Embed(
-                title="Stealing",
-                colour=0x00adff,
-                description=random_text["lose_text"].format(house=stolen_from["house_name"], points=amount_lost)
-            )
-            if len(random_text["author"]) != 0:
-                emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
-            await ctx.send(embed=emb)
-            json.dump(data, open(self.db_file, "w"), indent=4)
-            return
-
-    @steal.error
-    async def steal_erorr(self, ctx, error):
-        if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(f"You're a little tired from your last fiasco. Wait {round(error.retry_after, 2)} seconds to try again.")
+                amount_changed = random.randint(-35, -25)
+        stolen_from["house_points"] -= amount_changed
+        stealing_house_name["house_points"] += amount_changed
+        json.dump(data, open(self.db_file, "w"), indent=4)
+        emb = discord.Embed(title="Stealing", colour=0x00adff)
+        if amount_changed > 0:
+            random_text = random.choice(json.load(open(self.random_phrases))["steal_texts"]["gain_texts"])
+            emb.description = random_text["gain_text"].format(house=stolen_from["house_name"], points=amount_changed)
         else:
-            raise error
+            random_text = random.choice(json.load(open(self.random_phrases))["steal_texts"]["lose_texts"])
+            emb.description = random_text["lose_text"].format(house=stolen_from["house_name"], points=abs(amount_changed))
+        if len(random_text["author"]) != 0:
+            emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
+        await ctx.send(embed=emb)
+        return
 
     @commands.command()
     async def beg(self, ctx):
@@ -162,7 +120,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
             emb = discord.Embed(
                 title="Begging",
                 colour=0x00adff,
-                description = random_text["big_gain_text"].format(house=da_house["house_name"], points=points_awarded)
+                description = random_text["gain_text"].format(house=da_house["house_name"], points=points_awarded)
             )
             if len(random_text["author"]) != 0:
                 emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
@@ -195,8 +153,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
         myPins = await channel.pins()
         if data["last_pin_count"] > len(myPins):
             data["last_pin_count"] = len(myPins)
-            with open(self.db_file, "w") as f:
-                f.write(json.dumps(data, indent=4))
+            json.dump(data, open(self.db_file, "w"), indent=4)
             return
         else:
             data["last_pin_count"] = len(myPins)
@@ -213,6 +170,33 @@ class PointsCog(commands.Cog, name="Points Commands"):
                 await channel.send(f"50 points to {da_house}!")
             except IndexError:
                 pass
+
+    async def cog_command_error(self, ctx, error):
+        """The event triggered when an error is raised while invoking a command.
+        ctx   : Context
+        error : Exception"""
+
+        # Allows us to check for original exceptions raised and sent to CommandInvokeError.
+        # If nothing is found. We keep the exception passed to on_command_error.
+        error = getattr(error, 'original', error)
+
+        ignored = (commands.CommandNotFound, commands.UserInputError)
+
+        # Anything in ignored will return and prevent anything happening.
+        if isinstance(error, ignored):
+            return
+        elif isinstance(error, commands.DisabledCommand):
+            return await ctx.send(
+                f"Season's over for now! All the commands are all disabled until the next season begins!")
+        elif isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(
+                f"You're a little tired from your last fiasco. Wait {round(error.retry_after, 2)} seconds to try again.")
+        else:
+            raise error
+        # This prevents any commands with local handlers being handled here in on_command_error.
+        if hasattr(ctx.command, 'on_error'):
+            return
+
 
 
 def setup(client):

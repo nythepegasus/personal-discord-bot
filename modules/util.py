@@ -34,8 +34,19 @@ class UtilCog(commands.Cog, name="Utility Commands"):
             if channel.name == "archived-pins":
                 archive_channel = channel
         myPins = await general_chat.pins()
-        if len(myPins) == 0:
+        if len(myPins) == 50:
+            await ctx.send(
+                f"This wraps up the first season! Wait til <@195864152856723456> finally figures out everything for Season 2.")
+            conf_data = json.load(open("db_files/points.json"))
+            conf_data["season_over"] = 1
+            json.dump(conf_data, open("db_files/points.json", "w"), indent=4)
+            for command in self.client.get_cog("Points Commands").get_commands():
+                command.enabled = False
+            for listener in self.client.get_cog("Points Commands").get_listeners():
+                self.client.get_cog("Points Commands").remove_listener(listener)
+        elif len(myPins) == 0:
             await ctx.send("No more pins")
+            return
         for pin in myPins:
             emb = discord.Embed(
                 description = pin.content,
