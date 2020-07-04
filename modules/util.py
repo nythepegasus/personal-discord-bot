@@ -1,4 +1,4 @@
-import os, psutil, subprocess, time, datetime, speedtest, discord, gspread, json, logging, zipfile
+import os, psutil, subprocess, time, datetime, speedtest, discord, gspread, json, logging, zipfile, uptime
 from discord.ext import commands
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -35,10 +35,11 @@ class UtilCog(commands.Cog, name="Utility Commands"):
                 archive_channel = channel
         myPins = await general_chat.pins()
         if len(myPins) == 50:
-            await ctx.send(
-                f"This wraps up the first season! Wait til <@195864152856723456> finally figures out everything for Season 2.")
+            await ctx.send(f"This wraps up the first season! Wait til <@195864152856723456> finally figures out everything for Season 2.")
             conf_data = json.load(open("db_files/points.json"))
-            conf_data["season_over"] = 1
+            conf_data["season_stats"]["cur_season"] += 1
+            await general_chat.send(f"Season's over! Moving onto season {conf_data['season_stats']['cur_season']} in 7 days!\n(For maintenance and such. May be sooner ;))")
+            conf_data["season_stats"]["season_over"] = 1
             json.dump(conf_data, open("db_files/points.json", "w"), indent=4)
             for command in self.client.get_cog("Points Commands").get_commands():
                 command.enabled = False
@@ -96,12 +97,9 @@ class UtilCog(commands.Cog, name="Utility Commands"):
 
     @commands.command()
     async def stats(self, ctx):
-        uptime = subprocess.run("uptime", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        days = int(uptime.stdout.split()[2])
-        hours = str(int(uptime.stdout.split()[4].strip(b",").split(b":")[0])).zfill(2)
-        minutes = str(int(uptime.stdout.split()[4].strip(b",").split(b":")[1])).zfill(2)
+        cur_uptime = time.gmtime(uptime.uptime())
         stat_emb = discord.Embed(title="Discord Bot's Server Stats", colour=0x00adff)
-        stat_emb.add_field(name="Current Uptime", value=f"{days}:{hours}:{minutes}")
+        stat_emb.add_field(name="Current Uptime", value=f"{cur_uptime.tm_yday-1}:{cur_uptime.tm_hour}:{str(cur_uptime.tm_min).zfill(2)}")
         stat_emb.add_field(name="RAM Percentage", value=psutil.virtual_memory()[2])
         stat_emb.add_field(name="CPU Percentage", value=psutil.cpu_percent())
         stat_emb.set_footer(text="Proudly fixed with nano.")
