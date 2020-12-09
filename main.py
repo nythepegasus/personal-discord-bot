@@ -32,9 +32,6 @@ if os.path.isfile("conf_files/conf.json"):
             conf_data["owner_id"] = input("Input owner_id: ")
             json.dump(conf_data, open("conf_files/conf.json", "w"), indent=4)
             print("conf.json filled out, everything should work now!\n(As long as you filled in the correct info)")
-        elif confirm.lower() == "n":
-            print("Make sure to go through and set up conf.json!\nOtherwise, the bot will not work.")
-            exit(1)
         else:
             print("Make sure to go through and set up conf.json!\nOtherwise, the bot will not work.")
             exit(1)
@@ -45,14 +42,7 @@ client = commands.Bot(command_prefix=conf_data["command_prefix"])
 client.owner_id = int(conf_data["owner_id"])
 client.remove_command("help")
 
-initial_extensions = [
-            "modules.admin",
-            "modules.points",
-            "modules.phrases",
-            "modules.util"
-]
-
-for extension in initial_extensions:
+for extension in conf_data["modules"]:
     try:
         client.load_extension(extension)
         print(f"Loaded {extension}.")
