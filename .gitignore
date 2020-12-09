@@ -4,7 +4,7 @@ venv/
 conf_files/
 db_files/
 logs/
-test/
+/test/
 .DS_Store
 *.json
 test.py
