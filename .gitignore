@@ -5,7 +5,7 @@ conf_files/
 db_files/
 logs/
 /test/
-.DS_Store
+*.DS_Store
 *.json
 test.py
 *.old
