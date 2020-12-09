@@ -8,3 +8,4 @@ logs/
 *.json
 test.py
 *.old
+.DS_Store
