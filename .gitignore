@@ -1,8 +1,10 @@
+__pycache__/
+.idea/
+venv/
+conf_files/
+db_files/
+logs/
 .DS_Store
-__pycache__
 *.json
 test.py
 *.old
-TODO.md
-*.log
-.idea/
