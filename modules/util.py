@@ -10,7 +10,8 @@ class UtilCog(commands.Cog, name="Utility Commands"):
 
     @commands.command(aliases=["h"])
     async def help(self, ctx):
-        await ctx.message.delete()
+        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+            await ctx.message.delete()
         help_emb = discord.Embed(title="Bot Commands", colour=0x00adff)
         help_emb.add_field(name="buh!add_phrase | buh!ap", value="Add phrase to the tracker", inline=False)
         help_emb.add_field(name="buh!remove_phrase | buh!rp", value="Remove phrase from the tracker", inline=False)
@@ -27,7 +28,8 @@ class UtilCog(commands.Cog, name="Utility Commands"):
     @commands.command(name="archive_pins", aliases=["arcp"])
     @commands.is_owner()
     async def archive_pins(self, ctx):
-        await ctx.message.delete()
+        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+            await ctx.message.delete()
         guild = self.client.guilds[0]
         for channel in guild.channels:
             if channel.name == "general":
@@ -89,7 +91,8 @@ class UtilCog(commands.Cog, name="Utility Commands"):
 
     @commands.command()
     async def stats(self, ctx):
-        await ctx.message.delete()
+        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+            await ctx.message.delete()
         cur_uptime = time.gmtime(uptime.uptime())
         stat_emb = discord.Embed(title="Discord Bot's Server Stats", colour=0x00adff)
         stat_emb.add_field(name="Current Uptime", value=f"{cur_uptime.tm_yday-1}:{cur_uptime.tm_hour}:{str(cur_uptime.tm_min).zfill(2)}")
@@ -101,7 +104,8 @@ class UtilCog(commands.Cog, name="Utility Commands"):
     @commands.cooldown(1, 120, commands.BucketType.user)
     @commands.command()
     async def netstats(self, ctx):
-        await ctx.message.delete()
+        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+            await ctx.message.delete()
         async with ctx.typing():
             s = speedtest.Speedtest()
             s.get_best_server()
@@ -123,7 +127,8 @@ class UtilCog(commands.Cog, name="Utility Commands"):
     @commands.cooldown(1, 300, commands.BucketType.user)
     @commands.command(aliases=["urp"])
     async def update_random_phrases(self, ctx):
-        await ctx.message.delete()
+        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+            await ctx.message.delete()
         logging.basicConfig(filename='logs/gsheets.log', level=logging.WARNING)
         if not os.path.isfile("conf_files/google_api_creds.json"):
             msg = await ctx.send("No Google Sheets API google_api_creds.json file.\nCannot update random phrases.")

@@ -1,4 +1,4 @@
-import json, os
+import discord, json
 from discord.ext import commands
 
 
@@ -16,7 +16,8 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
 
     @commands.command(name="add_phrase", aliases=["ap"])
     async def add_phrase(self, ctx, phrase):
-        await ctx.message.delete()
+        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+            await ctx.message.delete()
         data = json.load(open(self.db_file))
         try:
             cur_index = data["phrases"][-1]["uid"] + 1
@@ -61,7 +62,9 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
 
     @commands.command(name="remove_phrase", aliases=["rp"])
     async def remove_phrase(self, ctx, phrase):
-        await ctx.message.delete()
+        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+            await ctx.message.delete()
+
         data = json.load(open(self.db_file))
         with open(self.db_file, "w") as f:
             data["phrases"] = [d for d in data["phrases"] if d.get("phrase") != phrase]
@@ -71,7 +74,8 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
 
     @commands.command(name="phrase_counts", aliases=["pc"])
     async def phrase_counts(self, ctx):
-        await ctx.message.delete()
+        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+            await ctx.message.delete()
         data = json.load(open(self.db_file))
         string_to_print = ""
         for phrase in data["phrases"]:

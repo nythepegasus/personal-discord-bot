@@ -15,7 +15,8 @@ class AdminCog(commands.Cog, name="Admin Commands"):
     @commands.command(name="run", hidden=True)
     @commands.is_owner()
     async def run(self, ctx, *, code):
-        await ctx.message.delete()
+        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+            await ctx.message.delete()
         code = code.strip('` ')
         python = '```py\n{}\n```'
         result = None
@@ -41,7 +42,8 @@ class AdminCog(commands.Cog, name="Admin Commands"):
     @commands.command(name='load', hidden=True)
     @commands.is_owner()
     async def load(self, ctx, *, cog: str):
-        await ctx.message.delete()
+        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+            await ctx.message.delete()
         """Command which Loads a Module."""
         try:
             self.client.load_extension(cog)
@@ -54,7 +56,8 @@ class AdminCog(commands.Cog, name="Admin Commands"):
     @commands.command(name='unload', hidden=True)
     @commands.is_owner()
     async def unload(self, ctx, *, cog: str):
-        await ctx.message.delete()
+        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+            await ctx.message.delete()
         """Command which Unloads a Module."""
         try:
             if cog == "modules.admin":
@@ -71,7 +74,8 @@ class AdminCog(commands.Cog, name="Admin Commands"):
     @commands.command(name='reload', hidden=True)
     @commands.is_owner()
     async def reload(self, ctx, *, cog: str):
-        await ctx.message.delete()
+        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+            await ctx.message.delete()
         """Command which Reloads a Module."""
         try:
             self.client.unload_extension(cog)
