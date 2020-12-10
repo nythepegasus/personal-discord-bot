@@ -48,7 +48,8 @@ class AdminCog(commands.Cog, name="Admin Commands"):
         except Exception as e:
             await ctx.send(f'**`ERROR:`**\n {type(e).__name__} - {e}')
         else:
-            await ctx.send(f"`{cog}` has been loaded!")
+            msg = await ctx.send(f"`{cog}` has been loaded!")
+            await msg.delete(delay=5)
 
     @commands.command(name='unload', hidden=True)
     @commands.is_owner()
@@ -57,13 +58,15 @@ class AdminCog(commands.Cog, name="Admin Commands"):
         """Command which Unloads a Module."""
         try:
             if cog == "modules.admin":
-                await ctx.send("It's not recommended to unload the admin cog.")
+                msg = await ctx.send("It's not recommended to unload the admin cog.")
+                await msg.delete(delay=5)
                 return
             self.client.unload_extension(cog)
         except Exception as e:
             await ctx.send(f'**`ERROR:`**\n {type(e).__name__} - {e}')
         else:
-            await ctx.send(f"`{cog}` has been unloaded!")
+            msg = await ctx.send(f"`{cog}` has been unloaded!")
+            await msg.delete(delay=5)
 
     @commands.command(name='reload', hidden=True)
     @commands.is_owner()
@@ -76,7 +79,8 @@ class AdminCog(commands.Cog, name="Admin Commands"):
         except Exception as e:
             await ctx.send(f'**`ERROR:`** {type(e).__name__} - {e}')
         else:
-            await ctx.send(f"`{cog}` has been reloaded!")
+            msg = await ctx.send(f"`{cog}` has been reloaded!")
+            await msg.delete(delay=5)
 
     def filter_message(self, message):
         message = message.replace(" ", "")

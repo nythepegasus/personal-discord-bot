@@ -54,10 +54,10 @@ class PointsCog(commands.Cog, name="Points Commands"):
                 emb = discord.Embed(title="Casting Spell", colour=0x00adff)
                 if points_changed > 0:
                     random_text = random.choice(json.load(open(self.random_phrases))["spell_texts"]["gain_texts"])
-                    emb.description = random_text["gain_text"].format(house=da_house, points=abs(points_changed))
+                    emb.description = random_text["text"].format(house=da_house, points=abs(points_changed))
                 else:
                     random_text = random.choice(json.load(open(self.random_phrases))["spell_texts"]["lose_texts"])
-                    emb.description = random_text["lose_text"].format(house=da_house, points=abs(points_changed))
+                    emb.description = random_text["text"].format(house=da_house, points=abs(points_changed))
                 if len(random_text["author"]) != 0:
                     emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
                 await ctx.send(embed=emb)
@@ -94,10 +94,10 @@ class PointsCog(commands.Cog, name="Points Commands"):
         emb = discord.Embed(title="Stealing", colour=0x00adff)
         if amount_changed > 0:
             random_text = random.choice(json.load(open(self.random_phrases))["steal_texts"]["gain_texts"])
-            emb.description = random_text["gain_text"].format(house=stolen_from["house_name"], points=amount_changed)
+            emb.description = random_text["text"].format(house=stolen_from["house_name"], points=amount_changed)
         else:
             random_text = random.choice(json.load(open(self.random_phrases))["steal_texts"]["lose_texts"])
-            emb.description = random_text["lose_text"].format(house=stolen_from["house_name"], points=abs(amount_changed))
+            emb.description = random_text["text"].format(house=stolen_from["house_name"], points=abs(amount_changed))
         if len(random_text["author"]) != 0:
             emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
         await ctx.send(embed=emb)
@@ -148,7 +148,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
         emb = discord.Embed(
             title="Begging",
             colour=0x00adff,
-            description=random_text["gain_text"].format(house=da_house["house_name"], points=points_awarded)
+            description=random_text["text"].format(house=da_house["house_name"], points=points_awarded)
         )
         if not random_text["author"] == "":
             emb.set_footer(text=f"Phrase provided from: {random_text['author']}")

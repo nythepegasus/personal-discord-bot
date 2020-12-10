@@ -24,16 +24,20 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
             cur_index = 1
         for line in data["phrases"]:
             if phrase == line["phrase"]:
-                await ctx.send("Phrase already exists!")
+                msg = await ctx.send("Phrase already exists!")
+                await msg.delete(delay=5)
                 return
             elif len(phrase) <= 2:
-                await ctx.send("Phrase too short!")
+                msg = await ctx.send("Phrase too short!")
+                await msg.delete(delay=5)
                 return
             elif len(phrase) >= 35:
-                await ctx.send("Phrase too long!")
+                msg = await ctx.send("Phrase too long!")
+                await msg.delete(delay=5)
                 return
             elif any(bad in phrase.lower() for bad in self.tonys_a_cunt):
-                await ctx.send("You're a cunt!")
+                msg = await ctx.send("You're a cunt!")
+                await msg.delete(delay=5)
                 return
         add_phrase = {
             "uid": cur_index,
@@ -43,7 +47,8 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
         with open(self.db_file, "w") as f:
             data["phrases"].append(add_phrase)
             f.write(json.dumps(data, indent=4))
-            await ctx.send("Phrase added!")
+            msg = await ctx.send("Phrase added!")
+            await msg.delete(delay=5)
 
     def update_phrase(self, phrase):
         data = json.load(open(self.db_file))
@@ -61,7 +66,8 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
         with open(self.db_file, "w") as f:
             data["phrases"] = [d for d in data["phrases"] if d.get("phrase") != phrase]
             f.write(json.dumps(data, indent=4))
-            await ctx.send("Removed phrase!")
+            msg = await ctx.send("Removed phrase!")
+            await msg.delete(delay=5)
 
     @commands.command(name="phrase_counts", aliases=["pc"])
     async def phrase_counts(self, ctx):

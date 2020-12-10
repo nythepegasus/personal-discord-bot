@@ -115,7 +115,8 @@ class UtilCog(commands.Cog, name="Utility Commands"):
     @netstats.error
     async def netstats_error(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(f"Wait {round(error.retry_after, 2)} more seconds.")
+            msg = await ctx.send(f"Wait {round(error.retry_after, 2)} more seconds.")
+            await msg.delete(5)
         else:
             raise error
 
@@ -125,7 +126,8 @@ class UtilCog(commands.Cog, name="Utility Commands"):
         await ctx.message.delete()
         logging.basicConfig(filename='logs/gsheets.log', level=logging.WARNING)
         if not os.path.isfile("conf_files/google_api_creds.json"):
-            await ctx.send("No Google Sheets API google_api_creds.json file.\nCannot update random phrases.")
+            msg = await ctx.send("No Google Sheets API google_api_creds.json file.\nCannot update random phrases.")
+            await msg.delete(delay=10)
             logging.warning("google_api_creds.json file doesn't exist! Cannot run update_random_phrases command.")
             return
         os.remove("db_files/random_texts.json")
@@ -156,7 +158,7 @@ class UtilCog(commands.Cog, name="Utility Commands"):
             try:
                 row[2].format(house="Test", points="Test")
             except KeyError:
-                logging.warning("This didn't have the proper keys:\nPhrase: {}\nBy: {}".format(row[2], author))
+                logging.warning("### WARNING ###\nThis didn't have the proper keys:\nPhrase: {}\nBy: {}".format(row[2], author))
                 continue
             if row[1] == "Gain" or row[1] == "Big Gain":
                 if row[1] == "Big Gain":
@@ -175,7 +177,8 @@ class UtilCog(commands.Cog, name="Utility Commands"):
 
             json_data["all_phrases"].append(row[2])
         json.dump(json_data, open("db_files/random_texts.json", "w"), indent=4)
-        await ctx.send("Phrases updated! Hopefully you see yours soon ;)")
+        msg = await ctx.send("Phrases updated! Hopefully you see yours soon ;)")
+        await msg.delete(delay=10)
 
 
 def setup(client):
