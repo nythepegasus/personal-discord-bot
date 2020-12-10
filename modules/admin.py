@@ -16,7 +16,7 @@ class AdminCog(commands.Cog, name="Admin Commands"):
     @commands.command(name="run", hidden=True)
     @commands.is_owner()
     async def run(self, ctx, *, code):
-        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
         code = code.strip('` ')
         python = '```py\n{}\n```'
@@ -43,7 +43,7 @@ class AdminCog(commands.Cog, name="Admin Commands"):
     @commands.command(name='load', hidden=True)
     @commands.is_owner()
     async def load(self, ctx, *, cog: str):
-        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
         """Command which Loads a Module."""
         try:
@@ -57,7 +57,8 @@ class AdminCog(commands.Cog, name="Admin Commands"):
     @commands.command(name='unload', hidden=True)
     @commands.is_owner()
     async def unload(self, ctx, *, cog: str):
-        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
+            print(isinstance(ctx.channel, discord.channel.DMChannel))
             await ctx.message.delete()
         """Command which Unloads a Module."""
         try:
@@ -75,7 +76,7 @@ class AdminCog(commands.Cog, name="Admin Commands"):
     @commands.command(name='reload', hidden=True)
     @commands.is_owner()
     async def reload(self, ctx, *, cog: str):
-        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
         """Command which Reloads a Module."""
         try:

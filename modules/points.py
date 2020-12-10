@@ -24,7 +24,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
 
     @commands.command(aliases=["hp"])
     async def house_points(self, ctx):
-        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
         data = json.load(open(self.db_file))
         house_emb = discord.Embed(title="House points", colour=0x00adff)
@@ -35,7 +35,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
     @commands.cooldown(1, 180, commands.BucketType.user)
     @commands.command(aliases=["cs"])
     async def cast_spell(self, ctx):
-        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
         data = json.load(open(self.db_file))
         if random.randint(1, 10) >= 5:
@@ -69,7 +69,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
     @commands.cooldown(1, 600, commands.BucketType.user)
     @commands.command()
     async def steal(self, ctx, house_name):
-        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
         data = json.load(open(self.db_file))
         houses_steal_from = data["houses"].copy()
@@ -108,7 +108,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
 
     @commands.command()
     async def beg(self, ctx):
-        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
         data = json.load(open(self.db_file))
         if ctx.message.author.id in [i["person"] for i in data["timeouts"]]:
@@ -161,7 +161,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
     @commands.command()
     async def starvetodeath(self, ctx):
         data = json.load(open(self.db_file))
-        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
         if data["commie_times"] != 5:
             await ctx.send(data["commie_strings"][data["commie_times"]])

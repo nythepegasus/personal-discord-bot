@@ -16,7 +16,7 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
 
     @commands.command(name="add_phrase", aliases=["ap"])
     async def add_phrase(self, ctx, phrase):
-        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
         data = json.load(open(self.db_file))
         try:
@@ -62,7 +62,7 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
 
     @commands.command(name="remove_phrase", aliases=["rp"])
     async def remove_phrase(self, ctx, phrase):
-        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
 
         data = json.load(open(self.db_file))
@@ -74,7 +74,7 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
 
     @commands.command(name="phrase_counts", aliases=["pc"])
     async def phrase_counts(self, ctx):
-        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
         data = json.load(open(self.db_file))
         string_to_print = ""

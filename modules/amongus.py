@@ -39,7 +39,7 @@ class AmongUsCog(commands.Cog, name="Among Us Cog"):
         players = json.load(open(self.db_file))
         players["voting"] = False
         json.dump(players, open(self.db_file, "w"), indent=4)
-        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
 
     @commands.command(name="during_voting", aliases=["dv"])
@@ -47,7 +47,7 @@ class AmongUsCog(commands.Cog, name="Among Us Cog"):
         players = json.load(open(self.db_file))
         players["voting"] = True
         json.dump(players, open(self.db_file, "w"), indent=4)
-        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
 
     @commands.command(name="start_game", aliases=["sg"])
@@ -65,7 +65,7 @@ class AmongUsCog(commands.Cog, name="Among Us Cog"):
                 players["all_players"].append(u.id)
         json.dump(players, open(self.db_file, "w"), indent=4)
         self.during_game.start()
-        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
 
     @commands.command(name="end_game", aliases=["eg"])
@@ -75,7 +75,7 @@ class AmongUsCog(commands.Cog, name="Among Us Cog"):
         for u in self.vc.members:
             await u.edit(deafen=False, mute=False)
         self.during_game.cancel()
-        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
 
     @commands.command(name="pdied", aliases=["pd"])
@@ -84,7 +84,7 @@ class AmongUsCog(commands.Cog, name="Among Us Cog"):
         players["alive"].remove(player.id)
         players["dead"].append(player.id)
         json.dump(players, open(self.db_file, "w"), indent=4)
-        if not isinstance(ctx.channel, discord.DMChannel) or not isinstance(ctx.channel, discord.GroupChannel):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
 
     async def cog_command_error(self, ctx, error):
