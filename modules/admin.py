@@ -25,7 +25,7 @@ class AdminCog(commands.Cog, name="Admin Commands"):
             'bot': self.client,
             'ctx': ctx,
             'message': ctx.message,
-            'server': ctx.message.server,
+            'guild': ctx.message.guild,
             'channel': ctx.message.channel,
             'author': ctx.message.author
         }
