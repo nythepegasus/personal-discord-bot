@@ -1,6 +1,8 @@
 import re
 import discord
 import inspect
+import contextlib
+import io
 from discord.ext import commands
 
 
@@ -18,11 +20,12 @@ class AdminCog(commands.Cog, name="Admin Commands"):
     async def run(self, ctx, *, code):
         if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
-        code = code.strip('` ')
+        code = code.replace('```py', '')
+        code = code.replace('```', '')
         python = '```py\n{}\n```'
         result = None
         env = {
-            'bot': self.client,
+            'client': self.client,
             'ctx': ctx,
             'message': ctx.message,
             'guild': ctx.message.guild,
@@ -30,15 +33,17 @@ class AdminCog(commands.Cog, name="Admin Commands"):
             'author': ctx.message.author
         }
         env.update(globals())
+        str_obj = io.StringIO()  # Retrieves a stream of data
         try:
-            result = eval(code, env)
-            if inspect.isawaitable(result):
-                result = await result
+            with contextlib.redirect_stdout(str_obj):
+                result = exec(code, env)
+                if inspect.isawaitable(result):
+                    await result
+                    return
         except Exception as e:
-            await ctx.send(python.format(type(e).__name__ + ': ' + str(e)))
-            return
-
-        await ctx.send(python.format(result))
+            return await ctx.send(f"```{e.__class__.__name__}: {e}```")
+        if str_obj.getvalue() != "":
+            await ctx.send(f'```{str_obj.getvalue()}```')
 
     @commands.command(name='load', hidden=True)
     @commands.is_owner()
