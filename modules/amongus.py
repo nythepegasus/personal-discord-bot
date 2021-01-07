@@ -1,7 +1,13 @@
 import asyncio
 import json
 import discord
+import sentry_sdk
 from discord.ext import commands, tasks
+
+sentry_sdk.init(
+    json.load(open("conf.json", "r"))["sentry_sdk"],
+    traces_sample_rate=1.0
+)
 
 
 class AmongUsCog(commands.Cog, name="Among Us Cog"):

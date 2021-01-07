@@ -1,6 +1,12 @@
 import os, psutil, subprocess, time, datetime, speedtest, discord, gspread, json, logging, zipfile, uptime
 from discord.ext import commands
+import sentry_sdk
 from oauth2client.service_account import ServiceAccountCredentials
+
+sentry_sdk.init(
+    json.load(open("conf.json", "r"))["sentry_sdk"],
+    traces_sample_rate=1.0
+)
 
 
 class UtilCog(commands.Cog, name="Utility Commands"):

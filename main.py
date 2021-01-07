@@ -4,6 +4,7 @@ import json
 import traceback
 import discord
 import zipfile
+import sentry_sdk
 from discord.ext import commands
 
 if not os.path.isdir("logs"):
@@ -41,6 +42,11 @@ TOKEN = conf_data["TOKEN"]
 client = commands.Bot(command_prefix=conf_data["command_prefix"])
 client.owner_id = int(conf_data["owner_id"])
 client.remove_command("help")
+
+sentry_sdk.init(
+    conf_data["sentry_sdk"],
+    traces_sample_rate=1.0
+)
 
 for extension in conf_data["modules"]:
     try:
