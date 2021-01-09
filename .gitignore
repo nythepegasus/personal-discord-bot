@@ -1,7 +1,11 @@
-__pycache__
+__pycache__/
+.idea/
+venv/
+conf_files/
+db_files/
+logs/
+/test/
+*.DS_Store
 *.json
 test.py
 *.old
-TODO.md
-*.log
-.idea/

@@ -4,6 +4,7 @@ import json
 import traceback
 import discord
 import zipfile
+import sentry_sdk
 from discord.ext import commands
 
 if not os.path.isdir("logs"):
@@ -32,27 +33,23 @@ if os.path.isfile("conf_files/conf.json"):
             conf_data["owner_id"] = input("Input owner_id: ")
             json.dump(conf_data, open("conf_files/conf.json", "w"), indent=4)
             print("conf.json filled out, everything should work now!\n(As long as you filled in the correct info)")
-        elif confirm.lower() == "n":
-            print("Make sure to go through and set up conf.json!\nOtherwise, the bot will not work.")
-            exit(1)
         else:
             print("Make sure to go through and set up conf.json!\nOtherwise, the bot will not work.")
             exit(1)
 
 # These should come from a conf file, the TOKEN, command_prefix, and owner_id (and others if need be)
 TOKEN = conf_data["TOKEN"]
-client = commands.Bot(command_prefix=conf_data["command_prefix"])
+intents = discord.Intents().all()
+client = commands.Bot(command_prefix=conf_data["command_prefix"], intents=intents)
 client.owner_id = int(conf_data["owner_id"])
 client.remove_command("help")
 
-initial_extensions = [
-            "modules.admin",
-            "modules.points",
-            "modules.phrases",
-            "modules.util"
-]
+sentry_sdk.init(
+    conf_data["sentry_sdk"],
+    traces_sample_rate=1.0
+)
 
-for extension in initial_extensions:
+for extension in conf_data["modules"]:
     try:
         client.load_extension(extension)
         print(f"Loaded {extension}.")

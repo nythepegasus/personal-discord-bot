@@ -1,5 +1,16 @@
 import re
+import discord
+import inspect
+import contextlib
+import io
+import sentry_sdk
+import json
 from discord.ext import commands
+
+sentry_sdk.init(
+    json.load(open("conf_files/conf.json", "r"))["sentry_sdk"],
+    traces_sample_rate=1.0
+)
 
 
 class AdminCog(commands.Cog, name="Admin Commands"):
@@ -11,34 +22,74 @@ class AdminCog(commands.Cog, name="Admin Commands"):
             "\u0631",
         ]
 
+    @commands.command(name="run", hidden=True)
+    @commands.is_owner()
+    async def run(self, ctx, *, code):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
+            await ctx.message.delete()
+        code = code.replace('```py', '')
+        code = code.replace('```', '')
+        python = '```py\n{}\n```'
+        result = None
+        env = {
+            'client': self.client,
+            'ctx': ctx,
+            'message': ctx.message,
+            'guild': ctx.message.guild,
+            'channel': ctx.message.channel,
+            'author': ctx.message.author
+        }
+        env.update(globals())
+        str_obj = io.StringIO()  # Retrieves a stream of data
+        try:
+            with contextlib.redirect_stdout(str_obj):
+                result = exec(code, env)
+                if inspect.isawaitable(result):
+                    await result
+                    return
+        except Exception as e:
+            return await ctx.send(f"```{e.__class__.__name__}: {e}```")
+        if str_obj.getvalue() != "":
+            await ctx.send(f'```{str_obj.getvalue()}```')
+
     @commands.command(name='load', hidden=True)
     @commands.is_owner()
     async def load(self, ctx, *, cog: str):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
+            await ctx.message.delete()
         """Command which Loads a Module."""
         try:
             self.client.load_extension(cog)
         except Exception as e:
             await ctx.send(f'**`ERROR:`**\n {type(e).__name__} - {e}')
         else:
-            await ctx.send(f"`{cog}` has been loaded!")
+            msg = await ctx.send(f"`{cog}` has been loaded!")
+            await msg.delete(delay=5)
 
     @commands.command(name='unload', hidden=True)
     @commands.is_owner()
     async def unload(self, ctx, *, cog: str):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
+            print(isinstance(ctx.channel, discord.channel.DMChannel))
+            await ctx.message.delete()
         """Command which Unloads a Module."""
         try:
             if cog == "modules.admin":
-                await ctx.send("It's not recommended to unload the admin cog.")
+                msg = await ctx.send("It's not recommended to unload the admin cog.")
+                await msg.delete(delay=5)
                 return
             self.client.unload_extension(cog)
         except Exception as e:
             await ctx.send(f'**`ERROR:`**\n {type(e).__name__} - {e}')
         else:
-            await ctx.send(f"`{cog}` has been unloaded!")
+            msg = await ctx.send(f"`{cog}` has been unloaded!")
+            await msg.delete(delay=5)
 
     @commands.command(name='reload', hidden=True)
     @commands.is_owner()
     async def reload(self, ctx, *, cog: str):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
+            await ctx.message.delete()
         """Command which Reloads a Module."""
         try:
             self.client.unload_extension(cog)
@@ -46,7 +97,8 @@ class AdminCog(commands.Cog, name="Admin Commands"):
         except Exception as e:
             await ctx.send(f'**`ERROR:`** {type(e).__name__} - {e}')
         else:
-            await ctx.send(f"`{cog}` has been reloaded!")
+            msg = await ctx.send(f"`{cog}` has been reloaded!")
+            await msg.delete(delay=5)
 
     def filter_message(self, message):
         message = message.replace(" ", "")

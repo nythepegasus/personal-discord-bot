@@ -1,6 +1,12 @@
-import os, psutil, subprocess, time, datetime, speedtest, discord, gspread, json, logging, zipfile
+import os, psutil, subprocess, time, datetime, speedtest, discord, gspread, json, logging, zipfile, uptime
 from discord.ext import commands
+import sentry_sdk
 from oauth2client.service_account import ServiceAccountCredentials
+
+sentry_sdk.init(
+    json.load(open("conf_files/conf.json", "r"))["sentry_sdk"],
+    traces_sample_rate=1.0
+)
 
 
 class UtilCog(commands.Cog, name="Utility Commands"):
@@ -10,6 +16,8 @@ class UtilCog(commands.Cog, name="Utility Commands"):
 
     @commands.command(aliases=["h"])
     async def help(self, ctx):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
+            await ctx.message.delete()
         help_emb = discord.Embed(title="Bot Commands", colour=0x00adff)
         help_emb.add_field(name="buh!add_phrase | buh!ap", value="Add phrase to the tracker", inline=False)
         help_emb.add_field(name="buh!remove_phrase | buh!rp", value="Remove phrase from the tracker", inline=False)
@@ -23,10 +31,11 @@ class UtilCog(commands.Cog, name="Utility Commands"):
         help_emb.set_footer(text="Developed by Nikki")
         await ctx.send(embed=help_emb)
 
-
     @commands.command(name="archive_pins", aliases=["arcp"])
     @commands.is_owner()
     async def archive_pins(self, ctx):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
+            await ctx.message.delete()
         guild = self.client.guilds[0]
         for channel in guild.channels:
             if channel.name == "general":
@@ -34,12 +43,16 @@ class UtilCog(commands.Cog, name="Utility Commands"):
             if channel.name == "archived-pins":
                 archive_channel = channel
         myPins = await general_chat.pins()
-        if len(myPins) == 0:
+        if len(myPins) == 50:
+            conf_data = json.load(open("db_files/points.json"))
+            json.dump(conf_data, open("db_files/points.json", "w"), indent=4)
+        elif len(myPins) == 0:
             await ctx.send("No more pins")
+            return
         for pin in myPins:
             emb = discord.Embed(
-                description = pin.content,
-                timestamp = datetime.datetime.utcfromtimestamp(int(time.time())),
+                description=pin.content,
+                timestamp=datetime.datetime.utcfromtimestamp(int(time.time())),
             )
             emb.set_author(
                 name=pin.author,
@@ -57,17 +70,17 @@ class UtilCog(commands.Cog, name="Utility Commands"):
                     try:
                         for attachment in pin.attachments:
                             next_emb = discord.Embed(
-                                timestamp = datetime.datetime.utcfromtimestamp(int(time.time())),
+                                timestamp=datetime.datetime.utcfromtimestamp(int(time.time())),
                             )
                             next_emb.set_author(
-                            name=pin.author,
-                            icon_url=pin.author.avatar_url,
-                            url="https://discordapp.com/channels/{0}/{1}/{2}".format(
-                                pin.guild.id, pin.channel.id, pin.id)
+                                name=pin.author,
+                                icon_url=pin.author.avatar_url,
+                                url="https://discordapp.com/channels/{0}/{1}/{2}".format(
+                                    pin.guild.id, pin.channel.id, pin.id)
                             )
                             img_url = pin.attachments[attach_counter].url
                             next_emb.set_image(url=img_url)
-                            next_emb.set_footer(text=f"Part {attach_counter+1} | Archived from #{pin.channel}")
+                            next_emb.set_footer(text=f"Part {attach_counter + 1} | Archived from #{pin.channel}")
                             attach_counter += 1
                             await archive_channel.send(embed=next_emb)
                     except IndexError:
@@ -82,24 +95,23 @@ class UtilCog(commands.Cog, name="Utility Commands"):
             await pin.unpin()
         await ctx.send(f"Archived the pins! Check them out in #{archive_channel}!")
 
-
     @commands.command()
     async def stats(self, ctx):
-        uptime = subprocess.run("uptime", stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        days = int(uptime.stdout.split()[2])
-        hours = str(int(uptime.stdout.split()[4].strip(b",").split(b":")[0])).zfill(2)
-        minutes = str(int(uptime.stdout.split()[4].strip(b",").split(b":")[1])).zfill(2)
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
+            await ctx.message.delete()
+        cur_uptime = time.gmtime(uptime.uptime())
         stat_emb = discord.Embed(title="Discord Bot's Server Stats", colour=0x00adff)
-        stat_emb.add_field(name="Current Uptime", value=f"{days}:{hours}:{minutes}")
+        stat_emb.add_field(name="Current Uptime", value=f"{cur_uptime.tm_yday-1}:{cur_uptime.tm_hour}:{str(cur_uptime.tm_min).zfill(2)}")
         stat_emb.add_field(name="RAM Percentage", value=psutil.virtual_memory()[2])
         stat_emb.add_field(name="CPU Percentage", value=psutil.cpu_percent())
         stat_emb.set_footer(text="Proudly fixed with nano.")
         await ctx.send(embed=stat_emb)
 
-
     @commands.cooldown(1, 120, commands.BucketType.user)
     @commands.command()
     async def netstats(self, ctx):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
+            await ctx.message.delete()
         async with ctx.typing():
             s = speedtest.Speedtest()
             s.get_best_server()
@@ -113,16 +125,21 @@ class UtilCog(commands.Cog, name="Utility Commands"):
     @netstats.error
     async def netstats_error(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(f"Wait {round(error.retry_after, 2)} more seconds.")
+            msg = await ctx.send(f"Wait {round(error.retry_after, 2)} more seconds.")
+            await msg.delete(5)
         else:
             raise error
 
     @commands.cooldown(1, 300, commands.BucketType.user)
     @commands.command(aliases=["urp"])
     async def update_random_phrases(self, ctx):
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
+            await ctx.message.delete()
         logging.basicConfig(filename='logs/gsheets.log', level=logging.WARNING)
-        if not os.path.isfile("conf_files/creds.json"):
-            logging.warning("creds.json file doesn't exist! Cannot run update_random_phrases command.")
+        if not os.path.isfile("conf_files/google_api_creds.json"):
+            msg = await ctx.send("No Google Sheets API google_api_creds.json file.\nCannot update random phrases.")
+            await msg.delete(delay=10)
+            logging.warning("google_api_creds.json file doesn't exist! Cannot run update_random_phrases command.")
             return
         os.remove("db_files/random_texts.json")
         with zipfile.ZipFile("all_backend.zip", "r") as zip_ref:
@@ -133,15 +150,15 @@ class UtilCog(commands.Cog, name="Utility Commands"):
             "https://www.googleapis.com/auth/drive.file",
             "https://www.googleapis.com/auth/drive"
         ]
-        creds = ServiceAccountCredentials.from_json_keyfile_name("conf_files/creds.json", scope)
-        client = gspread.authorize(creds)
+        client = gspread.authorize(
+            ServiceAccountCredentials.from_json_keyfile_name("conf_files/google_api_creds.json", scope))
         sheet = client.open("Discord Bot Stuffs").sheet1
         data = sheet.get_all_values()
         data.pop(0)
         for row in data:
             json_data = json.load(open("db_files/random_texts.json"))
             row.pop(0)  # Clean by getting rid of the timestamp
-            while("" in row):
+            while "" in row:
                 row.remove("")  # Get rid of all empty things, which cleans up selecting things too
             if len(row) == 0 or row[0] == "" or len(row) == 2:
                 continue
@@ -149,36 +166,30 @@ class UtilCog(commands.Cog, name="Utility Commands"):
                 author = row[3]
             else:
                 author = ""
-            if row[2] in json_data["all_phrases"]:
+            try:
+                row[2].format(house="Test", points="Test")
+            except KeyError:
+                logging.warning("### WARNING ###\nThis didn't have the proper keys:\nPhrase: {}\nBy: {}".format(row[2], author))
                 continue
             if row[1] == "Gain" or row[1] == "Big Gain":
-                try:
-                    row[2].format(house="Test", points="Test")
-                except KeyError:
-                    logging.warning("This didn't have the proper keys:\nPhrase: {}\nBy: {}".format(row[2], author))
-                    continue
                 if row[1] == "Big Gain":
-                    json_data["beg_texts"]["big_gain_texts"].append({"big_gain_text": row[2], "author": author})
+                    json_data["beg_texts"]["big_gain_texts"].append({"text": row[2], "author": author})
                 elif row[0] == "Spell text.":
-                    json_data["spell_texts"]["gain_texts"].append({"gain_text": row[2], "author": author})
+                    json_data["spell_texts"]["gain_texts"].append({"text": row[2], "author": author})
                 elif row[0] == "Steal text.":
-                    json_data["steal_texts"]["gain_texts"].append({"gain_text": row[2], "author": author})
+                    json_data["steal_texts"]["gain_texts"].append({"text": row[2], "author": author})
                 elif row[0] == "Beg text.":
-                    json_data["beg_texts"]["gain_texts"].append({"gain_text": row[2], "author": author})
+                    json_data["beg_texts"]["gain_texts"].append({"text": row[2], "author": author})
             elif row[1] == "Lose":
-                try:
-                    row[2].format(house="Test", points="Test")
-                except KeyError:
-                    logging.warning("This didn't have the proper keys:\nPhrase: {}\nBy: {}".format(row[2], author))
-                    continue
                 if row[0] == "Spell text.":
-                    json_data["spell_texts"]["lose_texts"].append({"lose_text": row[2], "author": author})
+                    json_data["spell_texts"]["lose_texts"].append({"text": row[2], "author": author})
                 elif row[0] == "Steal text.":
-                    json_data["steal_texts"]["lose_texts"].append({"lose_text": row[2], "author": author})
+                    json_data["steal_texts"]["lose_texts"].append({"text": row[2], "author": author})
 
             json_data["all_phrases"].append(row[2])
-            json.dump(json_data, open("db_files/random_texts.json", "w"), indent=4)
-        await ctx.send("Phrases updated! Hopefully you see yours soon ;)")
+        json.dump(json_data, open("db_files/random_texts.json", "w"), indent=4)
+        msg = await ctx.send("Phrases updated! Hopefully you see yours soon ;)")
+        await msg.delete(delay=10)
 
 
 def setup(client):
