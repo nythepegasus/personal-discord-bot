@@ -153,7 +153,8 @@ class PointsCog(commands.Cog, name="Points Commands"):
         emb.description = random_text["text"].format(house=cur_player.house, points=abs(points_changed))
         if not random_text["author"] == "":
             emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
-        await ctx.send(embed=emb)
+        msg = await ctx.send(embed=emb)
+        await msg.delete(delay=60)
 
     @commands.cooldown(1, 600, commands.BucketType.user)
     @commands.command()
@@ -193,7 +194,8 @@ class PointsCog(commands.Cog, name="Points Commands"):
             emb.description = random_text["text"].format(house=stole_player.house, points=abs(amount_changed))
         if len(random_text["author"]) != 0:
             emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
-        await ctx.send(embed=emb)
+        msg = await ctx.send(embed=emb)
+        await msg.delete(delay=60)
         return
 
     @commands.command()
@@ -236,7 +238,8 @@ class PointsCog(commands.Cog, name="Points Commands"):
         )
         if not random_text["author"] == "":
             emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
-        await ctx.send(embed=emb)
+        msg = await ctx.send(embed=emb)
+        await msg.delete(delay=60)
 
     @commands.command()
     async def starvetodeath(self, ctx):
