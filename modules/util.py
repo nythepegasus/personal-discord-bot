@@ -130,7 +130,7 @@ class UtilCog(commands.Cog, name="Utility Commands"):
         else:
             raise error
 
-    @commands.cooldown(1, 300, commands.BucketType.user)
+    #@commands.cooldown(1, 300, commands.BucketType.user)
     @commands.command(aliases=["urp"])
     async def update_random_phrases(self, ctx):
         if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
@@ -155,8 +155,8 @@ class UtilCog(commands.Cog, name="Utility Commands"):
         sheet = client.open("Discord Bot Stuffs").sheet1
         data = sheet.get_all_values()
         data.pop(0)
+        json_data = json.load(open("db_files/random_texts.json"))
         for row in data:
-            json_data = json.load(open("db_files/random_texts.json"))
             row.pop(0)  # Clean by getting rid of the timestamp
             while "" in row:
                 row.remove("")  # Get rid of all empty things, which cleans up selecting things too
@@ -185,8 +185,6 @@ class UtilCog(commands.Cog, name="Utility Commands"):
                     json_data["spell_texts"]["lose_texts"].append({"text": row[2], "author": author})
                 elif row[0] == "Steal text.":
                     json_data["steal_texts"]["lose_texts"].append({"text": row[2], "author": author})
-
-            json_data["all_phrases"].append(row[2])
         json.dump(json_data, open("db_files/random_texts.json", "w"), indent=4)
         msg = await ctx.send("Phrases updated! Hopefully you see yours soon ;)")
         await msg.delete(delay=10)
