@@ -39,7 +39,8 @@ if os.path.isfile("conf_files/conf.json"):
 
 # These should come from a conf file, the TOKEN, command_prefix, and owner_id (and others if need be)
 TOKEN = conf_data["TOKEN"]
-client = commands.Bot(command_prefix=conf_data["command_prefix"])
+intents = discord.Intents().all()
+client = commands.Bot(command_prefix=conf_data["command_prefix"], intents=intents)
 client.owner_id = int(conf_data["owner_id"])
 client.remove_command("help")
 
