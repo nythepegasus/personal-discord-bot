@@ -4,7 +4,7 @@ import sentry_sdk
 from discord.ext import commands
 
 sentry_sdk.init(
-    json.load(open("conf.json", "r"))["sentry_sdk"],
+    json.load(open("conf_files/conf.json", "r"))["sentry_sdk"],
     traces_sample_rate=1.0
 )
 
