@@ -1,9 +1,13 @@
+import os
 import json
 import random
 import datetime
 import discord
 import asyncio
 import sentry_sdk
+import matplotlib.pyplot as plt
+import itertools
+import typing
 from discord.ext import commands
 
 sentry_sdk.init(
@@ -214,7 +218,8 @@ class PointsCog(commands.Cog, name="Points Commands"):
         if cur_time > cur_timeout:
             cur_player.timeout = (datetime.datetime.now() + datetime.timedelta(days=1)).isoformat()
         else:
-            await ctx.send(f"It seems you've begged a few too many times. Give it {(cur_timeout - cur_time).seconds // 3600} hours and {((cur_timeout - cur_time).seconds // 60) % 60} minutes.")
+            msg = await ctx.send(f"It seems you've begged a few too many times. Give it {(cur_timeout - cur_time).seconds // 3600} hours and {((cur_timeout - cur_time).seconds // 60) % 60} minutes.")
+            await msg.delete(delay=10)
             return
         if random.randint(1, 10) >= 5:
             points_awarded = random.randint(40, 70)
@@ -277,6 +282,35 @@ class PointsCog(commands.Cog, name="Points Commands"):
         json.dump(data, open(self.db_file, "w"), indent=4)
         await ctx.send("What's done is done.\nMomento mori.")
 
+    @commands.cooldown(1, 600, commands.BucketType.user)
+    @commands.command(aliases=["ps"])
+    async def player_stats(self, ctx, player: typing.Optional[discord.User]):
+        data = json.load(open(self.db_file))
+        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
+            await ctx.message.delete()
+        if player is None:
+            cur_player = ctx.author
+            cur_player_points = data["members"][str(ctx.author.id)]["points_earned"]
+        else:
+            cur_player = player
+            cur_player_points = data["members"][str(player.id)]["points_earned"]
+        cur_player_diffs = list(itertools.accumulate(cur_player_points))
+        plt.clf()
+        plt.plot([float(i) for i in range(0, len(cur_player_diffs) + 1)],
+                 [0] + [float(i) for i in list(cur_player_diffs)])
+        plt.xticks([float(i) for i in range(0, len(cur_player_diffs) + 1)])
+        plt.yticks([float(i) for i in range(0, (max(cur_player_diffs) // 10 * 10) + 10, 10)])
+        plt.grid(True)
+        plt.savefig("{}.png".format(cur_player.id))
+        emb = discord.Embed(
+            title="{} Stats".format(cur_player.display_name),
+            description="X-Axis is the amount of bot commands\nY-Axis is the amount of points."
+        )
+        await ctx.send(embed=emb)
+        await ctx.send(file=discord.File("{}.png".format(cur_player.id)))
+        os.remove("{}.png".format(cur_player.id))
+        return
+
     @commands.Cog.listener()
     async def on_guild_channel_pins_update(self, channel, last_pin):
         if channel.name != "general":
@@ -308,6 +342,9 @@ class PointsCog(commands.Cog, name="Points Commands"):
         ctx   : Context
         error : Exception"""
         sentry_sdk.capture_exception(error)
+        # This prevents any commands with local handlers being handled here in on_command_error.
+        if hasattr(ctx.command, 'on_error'):
+            return
         # Allows us to check for original exceptions raised and sent to CommandInvokeError.
         # If nothing is found. We keep the exception passed to on_command_error.
         error = getattr(error, 'original', error)
@@ -328,9 +365,6 @@ class PointsCog(commands.Cog, name="Points Commands"):
         #                    "saving them. Better luck next time.")
         else:
             raise error
-        # This prevents any commands with local handlers being handled here in on_command_error.
-        if hasattr(ctx.command, 'on_error'):
-            return
 
 
 def setup(client):
