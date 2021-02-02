@@ -42,6 +42,7 @@ TOKEN = conf_data["TOKEN"]
 intents = discord.Intents().all()
 client = commands.Bot(command_prefix=conf_data["command_prefix"], intents=intents)
 client.owner_id = int(conf_data["owner_id"])
+client.conf_file = "conf_files/conf.json"
 client.remove_command("help")
 
 sentry_sdk.init(
@@ -65,5 +66,11 @@ async def on_ready():
     await client.change_presence(activity=funny_activity)
     for guild in client.guilds:
         print(f"Tester in {guild}")
+
+#@client.event
+#async def on_error(error):
+#    f, p = traceback.format_exc(), traceback.print_exc()
+#    sentry_sdk.capture_exception(f)
+#    print(p)
 
 client.run(TOKEN)
