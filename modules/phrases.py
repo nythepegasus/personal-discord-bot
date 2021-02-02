@@ -1,3 +1,4 @@
+import asyncio
 import discord
 import json
 import sentry_sdk
@@ -88,7 +89,7 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
         if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel,
                                                                                      discord.channel.GroupChannel):
             await ctx.message.delete()
-        json_data = json.load(open('random_phrases.json'))
+        json_data = json.load(open(self.client.random_phrases))
         args = phrase.split(" | ")
         if args[0] not in ["spell", "steal", "beg"]:
             return await ctx.send("Incorrect type specified!\nType must be `spell` or `steal` or `beg`!",
@@ -113,7 +114,7 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
             'pos': len(json_data['queue'])
         }
         json_data["queue"].append(phrase_to_add)
-        json.dump(json_data, open('random_phrases.json', 'w'), indent=4)
+        json.dump(json_data, open(self.client.random_phrases, 'w'), indent=4)
         await ctx.send("Phrase added to queue, hopefully you'll see it soon! ;)", delete_after=10)
 
     @commands.command(aliases=["apprp"])
@@ -121,7 +122,7 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
         if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel,
                                                                                      discord.channel.GroupChannel):
             await ctx.message.delete()
-        json_data = json.load(open('random_phrases.json'))
+        json_data = json.load(open(self.client.random_phrases))
         if len(json_data['queue']) == 0:
             return await ctx.send("No messages in queue!", delete_after=7)
         emb = discord.Embed()
@@ -160,7 +161,7 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
                     json_data['queue'].append(t)
         for j in json_data['queue']:  # reset positions in queue
             j['pos'] = json_data['queue'].index(j)
-        json.dump(json_data, open('random_phrases.json', 'w'), indent=4)
+        json.dump(json_data, open(self.client.random_phrases, 'w'), indent=4)
         await ctx.send("Phrase approval changes done!", delete_after=10)
 
     @commands.Cog.listener()
