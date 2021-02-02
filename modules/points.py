@@ -19,8 +19,8 @@ class PointsCog(commands.Cog, name="Points Commands"):
     def __init__(self, client: "Bot client"):
         self.client = client
         self.houses = ["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
-        self.db_file = 'db_files/points.json'
-        self.random_phrases = 'db_files/random_texts.json'
+        self.client.pts_db_file = 'db_files/points.json'
+        self.client.random_phrases = 'db_files/random_texts.json'
 
     class Player(object):
         def __init__(self, id: int, data: dict = None):
@@ -88,7 +88,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
             self.items.append(self.Item(name, value, quantity).item_json)
 
     async def player_helper(self, user):
-        data = json.load(open(self.db_file))
+        data = json.load(open(self.client.pts_db_file))
         try:
             cur_player = self.Player(user.id, data=data["members"][str(user.id)])
             return cur_player
@@ -104,19 +104,19 @@ class PointsCog(commands.Cog, name="Points Commands"):
                 return self.Player(user.id, {"name": user.name, "house": list(roles)[0], "season_history": [], "timeout": "", "points_earned": [], "items": []})
 
     def season_helper(self):
-        data = json.load(open(self.db_file))
+        data = json.load(open(self.client.pts_db_file))
         for k, v in data["members"].items():
             v["timeouts"] = ""
             v["season_history"].append(v["points_earned"])
             v["points_earned"] = []
         data["cur_season"] += 1
-        json.dump(data, open(self.db_file, "w"), indent=4)
+        json.dump(data, open(self.client.pts_db_file, "w"), indent=4)
 
     @commands.command(aliases=["hp"])
     async def house_points(self, ctx):
         if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
-        data = json.load(open(self.db_file))
+        data = json.load(open(self.client.pts_db_file))
         house_emb = discord.Embed(title="House points", colour=0x00adff)
         for house in self.houses:
             house_points = 0
@@ -135,30 +135,29 @@ class PointsCog(commands.Cog, name="Points Commands"):
         cur_player = await self.player_helper(ctx.message.author)
         if cur_player == 1:
             return
-        data = json.load(open(self.db_file))
+        data = json.load(open(self.client.pts_db_file))
         if random.randint(1, 10) >= 5:
+            points_changed = random.randint(3, 10)
             if random.randint(1, 10) >= 5:
                 points_changed = random.randint(10, 20)
-            else:
-                points_changed = random.randint(3, 10)
         else:
+            points_changed = random.randint(-25, -20)
             if random.randint(1, 10) <= 8:
                 points_changed = random.randint(-10, -3)
-            else:
-                points_changed = random.randint(-25, -20)
         cur_player.points_earned.append(points_changed)
         data["members"].update(cur_player.player_json)
-        json.dump(data, open(self.db_file, "w"), indent=4)
+        json.dump(data, open(self.client.pts_db_file, "w"), indent=4)
         emb = discord.Embed(title="Casting Spell", colour=0x00adff)
         if points_changed > 0:
-            random_text = random.choice(json.load(open(self.random_phrases))["spell_texts"]["gain_texts"])
+            random_text = random.choice([i for i in json.load(open(self.client.random_phrases))["phrases"]
+                                         if i["type"] == "spell" and i["points"] == "gain"])
         else:
-            random_text = random.choice(json.load(open(self.random_phrases))["spell_texts"]["lose_texts"])
+            random_text = random.choice([i for i in json.load(open(self.client.random_phrases))["phrases"]
+                                         if i["type"] == "spell" and i["points"] == "lose"])
         emb.description = random_text["text"].format(house=cur_player.house, points=abs(points_changed))
         if not random_text["author"] == "":
             emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
-        msg = await ctx.send(embed=emb)
-        await msg.delete(delay=60)
+        await ctx.send(embed=emb, delete_after=60)
 
     @commands.cooldown(1, 600, commands.BucketType.user)
     @commands.command()
@@ -166,11 +165,10 @@ class PointsCog(commands.Cog, name="Points Commands"):
         if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
         if house_name.capitalize() not in self.houses:
-            msg = await ctx.send("Couldn't find house!")
-            await msg.delete(delay=7)
+            await ctx.send("Couldn't find house!", delete_after=7)
             return
         cur_player = await self.player_helper(ctx.message.author)
-        data = json.load(open(self.db_file))
+        data = json.load(open(self.client.pts_db_file))
         if house_name.capitalize() == cur_player.house:
             await ctx.send("Why're you trying to steal from yourself? You're lucky your prefect ain't rapin' your ass for that.")
             return
@@ -188,18 +186,19 @@ class PointsCog(commands.Cog, name="Points Commands"):
         stole_player.points_earned.append(amount_changed)
         data["members"].update(cur_player.player_json)
         data["members"].update(stole_player.player_json)
-        json.dump(data, open(self.db_file, "w"), indent=4)
+        json.dump(data, open(self.client.pts_db_file, "w"), indent=4)
         emb = discord.Embed(title="Stealing", colour=0x00adff)
         if amount_changed > 0:
-            random_text = random.choice(json.load(open(self.random_phrases))["steal_texts"]["gain_texts"])
+            random_text = random.choice([i for i in json.load(open(self.client.random_phrases))["phrases"]
+                                         if i["type"] == "steal" and i["points"] == "gain"])
             emb.description = random_text["text"].format(house=stole_player.house, points=amount_changed)
         else:
-            random_text = random.choice(json.load(open(self.random_phrases))["steal_texts"]["lose_texts"])
+            random_text = random.choice([i for i in json.load(open(self.client.random_phrases))["phrases"]
+                                         if i["type"] == "steal" and i["points"] == "lose"])
             emb.description = random_text["text"].format(house=stole_player.house, points=abs(amount_changed))
         if len(random_text["author"]) != 0:
             emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
-        msg = await ctx.send(embed=emb)
-        await msg.delete(delay=60)
+        await ctx.send(embed=emb, delete_after=60)
         return
 
     @commands.command()
@@ -209,7 +208,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
         cur_player = await self.player_helper(ctx.message.author)
         if cur_player == 1:
             return
-        data = json.load(open(self.db_file))
+        data = json.load(open(self.client.pts_db_file))
         cur_time = datetime.datetime.now()
         try:
             cur_timeout = datetime.datetime.strptime(cur_player.timeout, '%Y-%m-%dT%H:%M:%S.%f')
@@ -218,12 +217,12 @@ class PointsCog(commands.Cog, name="Points Commands"):
         if cur_time > cur_timeout:
             cur_player.timeout = (datetime.datetime.now() + datetime.timedelta(days=1)).isoformat()
         else:
-            msg = await ctx.send(f"It seems you've begged a few too many times. Give it {(cur_timeout - cur_time).seconds // 3600} hours and {((cur_timeout - cur_time).seconds // 60) % 60} minutes.")
-            await msg.delete(delay=10)
+            await ctx.send(f"It seems you've begged a few too many times. Give it {(cur_timeout - cur_time).seconds // 3600} hours and {((cur_timeout - cur_time).seconds // 60) % 60} minutes.", delete_after=10)
             return
         if random.randint(1, 10) >= 5:
             points_awarded = random.randint(40, 70)
-            random_text = random.choice(json.load(open(self.random_phrases))["beg_texts"]["big_gain_texts"])
+            random_text = random.choice([i for i in json.load(open(self.client.random_phrases))["phrases"]
+                                         if i["type"] == "beg" and i["points"] == "big"])
         else:
             if random.randint(1, 10) <= 2:
                 points_awarded = 150
@@ -232,10 +231,11 @@ class PointsCog(commands.Cog, name="Points Commands"):
                 await ctx.send(embed=emb)
             else:
                 points_awarded = random.randint(25, 35)
-                random_text = random.choice(json.load(open(self.random_phrases))["beg_texts"]["gain_texts"])
+                random_text = random.choice([i for i in json.load(open(self.client.random_phrases))["phrases"]
+                                             if i["type"] == "beg" and i["points"] == "gain"])
         cur_player.points_earned.append(points_awarded)
         data["members"].update(cur_player.player_json)
-        json.dump(data, open(self.db_file, "w"), indent=4)
+        json.dump(data, open(self.client.pts_db_file, "w"), indent=4)
         emb = discord.Embed(
             title="Begging",
             colour=0x00adff,
@@ -243,26 +243,23 @@ class PointsCog(commands.Cog, name="Points Commands"):
         )
         if not random_text["author"] == "":
             emb.set_footer(text=f"Phrase provided from: {random_text['author']}")
-        msg = await ctx.send(embed=emb)
-        await msg.delete(delay=60)
+        await ctx.send(embed=emb, delete_after=60)
 
     @commands.command()
     async def starvetodeath(self, ctx):
-        data = json.load(open(self.db_file))
+        data = json.load(open(self.client.pts_db_file))
         if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
         if data["commie_times"] != 5:
             await ctx.send(data["commie_strings"][data["commie_times"]])
             data["commie_times"] += 1
-            json.dump(data, open(self.db_file, "w"), indent=4)
+            json.dump(data, open(self.client.pts_db_file, "w"), indent=4)
             return
         elif data["commie_ran"]:
-            msg = await ctx.send("What's done is done, and cannot be done again.\n\n*For now..*")
-            await msg.delete(delay=5)
+            await ctx.send("What's done is done, and cannot be done again.\n\n*For now..*", delete_after=5)
             return
         elif data["last_pin_count"] <= 40:
-            msg = await ctx.send("It's much too early for this.. Why not enjoy life for a while?\n*At least, while you still can.*")
-            await msg.delete(delay=5)
+            await ctx.send("It's much too early for this.. Why not enjoy life for a while?\n*At least, while you still can.*", delete_after=5)
             return
         await ctx.send(f"Oooo, you've done the thing, {ctx.author.mention}. What you have done cannot be reversed. I hope you realize that, and I hope you're okay with the consequences.")
         await ctx.send("Operation done in..")
@@ -279,13 +276,13 @@ class PointsCog(commands.Cog, name="Points Commands"):
         for i in data["houses"]:
             i["house_points"] = int(communism)+1
         data["commie_ran"] = True
-        json.dump(data, open(self.db_file, "w"), indent=4)
+        json.dump(data, open(self.client.pts_db_file, "w"), indent=4)
         await ctx.send("What's done is done.\nMomento mori.")
 
     @commands.cooldown(1, 600, commands.BucketType.user)
     @commands.command(aliases=["ps"])
     async def player_stats(self, ctx, player: typing.Optional[discord.User]):
-        data = json.load(open(self.db_file))
+        data = json.load(open(self.client.pts_db_file))
         if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
             await ctx.message.delete()
         if player is None:
@@ -315,7 +312,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
     async def on_guild_channel_pins_update(self, channel, last_pin):
         if channel.name != "general":
             return
-        data = json.load(open(self.db_file))
+        data = json.load(open(self.client.pts_db_file))
         async for entry in channel.guild.audit_logs(action=discord.AuditLogAction.message_pin, limit=1):
             t = datetime.datetime.utcnow() - entry.created_at
             if t.seconds == 0 or t.days < 0:
@@ -330,7 +327,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
                     data["members"].update(giver.player_json)
                 print(data["members"][str(given.id)])
                 data["members"].update(given.player_json)
-                json.dump(data, open(self.db_file, "w"), indent=4)
+                json.dump(data, open(self.client.pts_db_file, "w"), indent=4)
                 p = await channel.pins()
                 if len(p) == 50:
                     self.season_helper()
@@ -356,9 +353,8 @@ class PointsCog(commands.Cog, name="Points Commands"):
             return
         elif isinstance(error, commands.CommandOnCooldown):
             await ctx.message.delete()
-            msg = await ctx.send(
-                f"{ctx.message.author.mention} You're a little tired from your last fiasco. Wait {round(error.retry_after, 2)} seconds to try again.")
-            await msg.delete(delay=7)
+            await ctx.send(
+                f"{ctx.message.author.mention} You're a little tired from your last fiasco. Wait {round(error.retry_after, 2)} seconds to try again.", delete_after=7)
         # elif isinstance(error, KeyError):
         #     await ctx.send("Something went wrong when sending the random text (Blame Tony, always blame Tony). Your "
         #                    "points should be there, but if not, they were eaten by the old Gods, and there's no "
