@@ -228,7 +228,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
                 points_awarded = 150
                 emb = discord.Embed(title="**HOLY FUCKING SHIT!**", colour=0x00adff, description="Your luck just fuckin' turned around, bucko. You just gained {} points for {}.".format(points_awarded, cur_player.house))
                 emb.set_footer(text="From Dumbledore's Grace")
-                await ctx.send(embed=emb)
+                await ctx.send(embed=emb, delete_after=60)
             else:
                 points_awarded = random.randint(25, 35)
                 random_text = random.choice([i for i in json.load(open(self.client.random_phrases))["phrases"]
