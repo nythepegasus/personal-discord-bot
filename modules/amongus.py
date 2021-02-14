@@ -17,10 +17,11 @@ class AmongUsCog(commands.Cog, name="Among Us Cog"):
         self.vc = None
         self.voting_time = None
         self.client.au_db_file = "db_files/amongus.json"
-        self.logger = logging.getLogger("AdminCog")
-        a_handler = logging.FileHandler("logs/admin.log")
+        self.logger = logging.getLogger("AmongUsCog")
+        self.logger.setLevel(logging.DEBUG)
+        a_handler = logging.FileHandler("logs/amongus.log")
         a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - $(message)s"))
-        a_handler.setLevel(logging.INFO)
+        a_handler.setLevel(logging.DEBUG)
         self.logger.addHandler(a_handler)
 
     async def cog_before_invoke(self, ctx):
