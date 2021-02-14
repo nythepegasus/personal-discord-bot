@@ -23,7 +23,7 @@ class UtilCog(commands.Cog, name="Utility Commands"):
         self.logger = logging.getLogger("UtilCog")
         self.logger.setLevel(logging.DEBUG)
         a_handler = logging.FileHandler("logs/util.log")
-        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - $(message)s"))
+        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
         a_handler.setLevel(logging.DEBUG)
         self.logger.addHandler(a_handler)
 

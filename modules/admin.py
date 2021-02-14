@@ -25,7 +25,7 @@ class AdminCog(commands.Cog, name="Admin Commands"):
         self.logger = logging.getLogger("AdminCog")
         self.logger.setLevel(logging.DEBUG)
         a_handler = logging.FileHandler("logs/admin.log")
-        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - $(message)s"))
+        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
         a_handler.setLevel(logging.DEBUG)
         self.logger.addHandler(a_handler)
 

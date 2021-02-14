@@ -25,7 +25,7 @@ class PointsCog(commands.Cog, name="Points Commands"):
         self.logger = logging.getLogger("PointsCog")
         self.logger.setLevel(logging.DEBUG)
         a_handler = logging.FileHandler("logs/points.log")
-        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - $(message)s"))
+        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
         a_handler.setLevel(logging.DEBUG)
         self.logger.addHandler(a_handler)
 

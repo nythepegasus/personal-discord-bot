@@ -25,7 +25,7 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
         self.logger = logging.getLogger("PhrasesCog")
         self.logger.setLevel(logging.DEBUG)
         a_handler = logging.FileHandler("logs/phrases.log")
-        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - $(message)s"))
+        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
         a_handler.setLevel(logging.DEBUG)
         self.logger.addHandler(a_handler)
 

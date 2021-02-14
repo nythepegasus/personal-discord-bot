@@ -20,7 +20,7 @@ class AmongUsCog(commands.Cog, name="Among Us Cog"):
         self.logger = logging.getLogger("AmongUsCog")
         self.logger.setLevel(logging.DEBUG)
         a_handler = logging.FileHandler("logs/amongus.log")
-        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - $(message)s"))
+        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
         a_handler.setLevel(logging.DEBUG)
         self.logger.addHandler(a_handler)
 
