@@ -5,6 +5,7 @@ import contextlib
 import io
 import sentry_sdk
 import json
+import logging
 from discord.ext import commands
 
 sentry_sdk.init(
@@ -21,12 +22,18 @@ class AdminCog(commands.Cog, name="Admin Commands"):
             "\u064d",
             "\u0631",
         ]
+        self.logger = logging.getLogger("AdminCog")
+        a_handler = logging.FileHandler("logs/admin.log")
+        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - $(message)s"))
+        a_handler.setLevel(logging.INFO)
+        self.logger.addHandler(a_handler)
+
+    async def cog_before_invoke(self, ctx):
+        self.logger.info(f"{ctx.author.name} ran {ctx.command} with message {ctx.message.content}")
 
     @commands.command(name="run", hidden=True)
     @commands.is_owner()
     async def run(self, ctx, *, code):
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            await ctx.message.delete()
         code = code.replace('```py', '')
         code = code.replace('```', '')
         python = '```py\n{}\n```'
@@ -55,8 +62,6 @@ class AdminCog(commands.Cog, name="Admin Commands"):
     @commands.command(name='load', hidden=True)
     @commands.is_owner()
     async def load(self, ctx, *, cog: str):
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            await ctx.message.delete()
         """Command which Loads a Module."""
         try:
             self.client.load_extension(cog)
@@ -68,9 +73,6 @@ class AdminCog(commands.Cog, name="Admin Commands"):
     @commands.command(name='unload', hidden=True)
     @commands.is_owner()
     async def unload(self, ctx, *, cog: str):
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            print(isinstance(ctx.channel, discord.channel.DMChannel))
-            await ctx.message.delete()
         """Command which Unloads a Module."""
         try:
             if cog == "modules.admin":
@@ -85,8 +87,6 @@ class AdminCog(commands.Cog, name="Admin Commands"):
     @commands.command(name='reload', hidden=True)
     @commands.is_owner()
     async def reload(self, ctx, *, cog: str):
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            await ctx.message.delete()
         """Command which Reloads a Module."""
         try:
             self.client.unload_extension(cog)
@@ -118,6 +118,7 @@ class AdminCog(commands.Cog, name="Admin Commands"):
     @commands.Cog.listener()
     async def on_message(self, message):
         if any(bad in message.content for bad in self.tonys_a_cunt):
+            self.logger.warning(f"{message.author.name} said {message.content}")
             await message.delete()
             dmchannel = await message.author.create_dm()
             await dmchannel.send("You're a cunt for trying that.")

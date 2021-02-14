@@ -2,6 +2,7 @@ import asyncio
 import json
 import discord
 import sentry_sdk
+import logging
 from discord.ext import commands, tasks
 
 sentry_sdk.init(
@@ -16,6 +17,14 @@ class AmongUsCog(commands.Cog, name="Among Us Cog"):
         self.vc = None
         self.voting_time = None
         self.client.au_db_file = "db_files/amongus.json"
+        self.logger = logging.getLogger("AdminCog")
+        a_handler = logging.FileHandler("logs/admin.log")
+        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - $(message)s"))
+        a_handler.setLevel(logging.INFO)
+        self.logger.addHandler(a_handler)
+
+    async def cog_before_invoke(self, ctx):
+        self.logger.info(f"{ctx.author.name} ran {ctx.command} with message {ctx.message.content}")
 
     @tasks.loop(seconds=1)
     async def during_game(self):
@@ -45,16 +54,12 @@ class AmongUsCog(commands.Cog, name="Among Us Cog"):
         players = json.load(open(self.client.au_db_file))
         players["voting"] = False
         json.dump(players, open(self.client.au_db_file, "w"), indent=4)
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            await ctx.message.delete()
 
     @commands.command(name="during_voting", aliases=["dv"])
     async def during_voting(self, ctx):
         players = json.load(open(self.client.au_db_file))
         players["voting"] = True
         json.dump(players, open(self.client.au_db_file, "w"), indent=4)
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            await ctx.message.delete()
 
     @commands.command(name="start_game", aliases=["sg"])
     async def start_game(self, ctx):
@@ -71,8 +76,6 @@ class AmongUsCog(commands.Cog, name="Among Us Cog"):
                 players["all_players"].append(u.id)
         json.dump(players, open(self.client.au_db_file, "w"), indent=4)
         self.during_game.start()
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            await ctx.message.delete()
 
     @commands.command(name="end_game", aliases=["eg"])
     async def end_game(self, ctx):
@@ -81,8 +84,6 @@ class AmongUsCog(commands.Cog, name="Among Us Cog"):
         for u in self.vc.members:
             await u.edit(deafen=False, mute=False)
         self.during_game.cancel()
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            await ctx.message.delete()
 
     @commands.command(name="pdied", aliases=["pd"])
     async def pdied(self, ctx, player: discord.Member):
@@ -90,8 +91,6 @@ class AmongUsCog(commands.Cog, name="Among Us Cog"):
         players["alive"].remove(player.id)
         players["dead"].append(player.id)
         json.dump(players, open(self.client.au_db_file, "w"), indent=4)
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            await ctx.message.delete()
 
     async def cog_command_error(self, ctx, error):
         error = getattr(error, 'original', error)

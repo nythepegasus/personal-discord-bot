@@ -4,6 +4,7 @@ import discord
 import json
 import psutil
 import sentry_sdk
+import logging
 import speedtest
 import time
 import uptime
@@ -19,12 +20,17 @@ sentry_sdk.init(
 class UtilCog(commands.Cog, name="Utility Commands"):
     def __init__(self, client):
         self.client = client
+        self.logger = logging.getLogger("UtilCog")
+        a_handler = logging.FileHandler("logs/util.log")
+        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - $(message)s"))
+        a_handler.setLevel(logging.INFO)
+        self.logger.addHandler(a_handler)
+
+    async def cog_before_invoke(self, ctx):
+        self.logger.info(f"{ctx.author.name} ran {ctx.command} with message {ctx.message.content}")
 
     @commands.command(aliases=["h"])
     async def help(self, ctx):
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel,
-                                                                                     discord.channel.GroupChannel):
-            await ctx.message.delete()
         help_emb = discord.Embed(title="Bot Commands", colour=0x00adff)
         help_emb.add_field(name="buh!add_phrase | buh!ap", value="Add phrase to the tracker", inline=False)
         help_emb.add_field(name="buh!remove_phrase | buh!rp", value="Remove phrase from the tracker", inline=False)
@@ -43,9 +49,6 @@ class UtilCog(commands.Cog, name="Utility Commands"):
     @commands.command(name="archive_pins", aliases=["arcp"])
     @commands.is_owner()
     async def archive_pins(self, ctx):
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel,
-                                                                                     discord.channel.GroupChannel):
-            await ctx.message.delete()
         guild = self.client.guilds[0]
         for channel in guild.channels:
             if channel.name == "general":
@@ -107,9 +110,6 @@ class UtilCog(commands.Cog, name="Utility Commands"):
 
     @commands.command()
     async def stats(self, ctx):
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel,
-                                                                                     discord.channel.GroupChannel):
-            await ctx.message.delete()
         cur_uptime = time.gmtime(uptime.uptime())
         stat_emb = discord.Embed(title="Discord Bot's Server Stats", colour=0x00adff)
         stat_emb.add_field(name="Current Uptime",
@@ -122,9 +122,6 @@ class UtilCog(commands.Cog, name="Utility Commands"):
     @commands.cooldown(1, 120, commands.BucketType.user)
     @commands.command()
     async def netstats(self, ctx):
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel,
-                                                                                     discord.channel.GroupChannel):
-            await ctx.message.delete()
         async with ctx.typing():
             s = speedtest.Speedtest()
             s.get_best_server()

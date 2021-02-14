@@ -5,6 +5,7 @@ import datetime
 import discord
 import asyncio
 import sentry_sdk
+import logging
 import matplotlib.pyplot as plt
 import itertools
 import typing
@@ -21,6 +22,14 @@ class PointsCog(commands.Cog, name="Points Commands"):
         self.houses = ["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
         self.client.pts_db_file = 'db_files/points.json'
         self.client.random_phrases = 'db_files/random_texts.json'
+        self.logger = logging.getLogger("PointsCog")
+        a_handler = logging.FileHandler("logs/points.log")
+        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - $(message)s"))
+        a_handler.setLevel(logging.INFO)
+        self.logger.addHandler(a_handler)
+
+    async def cog_before_invoke(self, ctx):
+        self.logger.info(f"{ctx.author.name} ran {ctx.command} with message {ctx.message.content}")
 
     class Player(object):
         def __init__(self, id: int, data: dict = None):
@@ -114,8 +123,6 @@ class PointsCog(commands.Cog, name="Points Commands"):
 
     @commands.command(aliases=["hp"])
     async def house_points(self, ctx):
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            await ctx.message.delete()
         data = json.load(open(self.client.pts_db_file))
         house_emb = discord.Embed(title="House points", colour=0x00adff)
         for house in self.houses:
@@ -130,8 +137,6 @@ class PointsCog(commands.Cog, name="Points Commands"):
     @commands.cooldown(1, 180, commands.BucketType.user)
     @commands.command(aliases=["cs"])
     async def cast_spell(self, ctx):
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            await ctx.message.delete()
         cur_player = await self.player_helper(ctx.message.author)
         if cur_player == 1:
             return
@@ -162,8 +167,6 @@ class PointsCog(commands.Cog, name="Points Commands"):
     @commands.cooldown(1, 600, commands.BucketType.user)
     @commands.command()
     async def steal(self, ctx, house_name):
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            await ctx.message.delete()
         if house_name.capitalize() not in self.houses:
             await ctx.send("Couldn't find house!", delete_after=7)
             return
@@ -203,8 +206,6 @@ class PointsCog(commands.Cog, name="Points Commands"):
 
     @commands.command()
     async def beg(self, ctx):
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            await ctx.message.delete()
         cur_player = await self.player_helper(ctx.message.author)
         if cur_player == 1:
             return
@@ -248,8 +249,6 @@ class PointsCog(commands.Cog, name="Points Commands"):
     @commands.command()
     async def starvetodeath(self, ctx):
         data = json.load(open(self.client.pts_db_file))
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            await ctx.message.delete()
         if data["commie_times"] != 5:
             await ctx.send(data["commie_strings"][data["commie_times"]])
             data["commie_times"] += 1
@@ -283,8 +282,6 @@ class PointsCog(commands.Cog, name="Points Commands"):
     @commands.command(aliases=["ps"])
     async def player_stats(self, ctx, player: typing.Optional[discord.User]):
         data = json.load(open(self.client.pts_db_file))
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            await ctx.message.delete()
         if player is None:
             cur_player = ctx.author
             cur_player_points = data["members"][str(ctx.author.id)]["points_earned"]

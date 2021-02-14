@@ -2,6 +2,7 @@ import asyncio
 import discord
 import json
 import sentry_sdk
+import logging
 from discord.ext import commands
 
 sentry_sdk.init(
@@ -21,11 +22,17 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
             "nigger",
             "nigga"
         ]
+        self.logger = logging.getLogger("PhrasesCog")
+        a_handler = logging.FileHandler("logs/phrases.log")
+        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - $(message)s"))
+        a_handler.setLevel(logging.INFO)
+        self.logger.addHandler(a_handler)
+
+    async def cog_before_invoke(self, ctx):
+        self.logger.info(f"{ctx.author.name} ran {ctx.command} with message {ctx.message.content}")
 
     @commands.command(name="add_phrase", aliases=["ap"])
     async def add_phrase(self, ctx, phrase):
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            await ctx.message.delete()
         data = json.load(open(self.client.phr_db_file))
         try:
             cur_index = data["phrases"][-1]["uid"] + 1
@@ -65,9 +72,6 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
 
     @commands.command(name="remove_phrase", aliases=["rp"])
     async def remove_phrase(self, ctx, phrase):
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            await ctx.message.delete()
-
         data = json.load(open(self.client.phr_db_file))
         with open(self.client.phr_db_file, "w") as f:
             data["phrases"] = [d for d in data["phrases"] if d.get("phrase") != phrase]
@@ -76,8 +80,6 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
 
     @commands.command(name="phrase_counts", aliases=["pc"])
     async def phrase_counts(self, ctx):
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel, discord.channel.GroupChannel):
-            await ctx.message.delete()
         data = json.load(open(self.client.phr_db_file))
         string_to_print = ""
         for phrase in data["phrases"]:
@@ -86,9 +88,6 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
 
     @commands.command(aliases=['arp'])
     async def add_rphrase(self, ctx, *, phrase):
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel,
-                                                                                     discord.channel.GroupChannel):
-            await ctx.message.delete()
         json_data = json.load(open(self.client.random_phrases))
         args = phrase.split(" | ")
         if args[0] not in ["spell", "steal", "beg"]:
@@ -119,9 +118,6 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
 
     @commands.command(aliases=["apprp"])
     async def approve_rphrases(self, ctx):
-        if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel,
-                                                                                     discord.channel.GroupChannel):
-            await ctx.message.delete()
         json_data = json.load(open(self.client.random_phrases))
         if len(json_data['queue']) == 0:
             return await ctx.send("No messages in queue!", delete_after=7)
@@ -172,7 +168,6 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
             await message.delete()
             return
         self.update_phrase(message.content)
-
 
 
 def setup(client):
