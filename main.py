@@ -26,7 +26,7 @@ else:
     client.pshovr = None
 client._mainlogger = logging.getLogger("BotGeneral")
 client._mainlogger.setLevel(logging.DEBUG)
-a_handler = logging.FileHandler("logs/amongus.log")
+a_handler = logging.FileHandler("logs/bot.log")
 a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
 a_handler.setLevel(logging.DEBUG)
 client._mainlogger.addHandler(a_handler)
