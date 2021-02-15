@@ -6,6 +6,7 @@ import discord
 import zipfile
 import sentry_sdk
 import pushover
+import logging
 from discord.ext import commands
 
 # These should come from a conf file, the TOKEN, command_prefix, and owner_id (and others if need be)
@@ -23,6 +24,13 @@ if psh_data['user_key'] is not "" and psh_data['api_key'] is not "":
                                     api_token=psh_data['api_key'])
 else:
     client.pshovr = None
+client._mainlogger = logging.getLogger("BotGeneral")
+client._mainlogger.setLevel(logging.DEBUG)
+a_handler = logging.FileHandler("logs/amongus.log")
+a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
+a_handler.setLevel(logging.DEBUG)
+client._mainlogger.addHandler(a_handler)
+
 client.remove_command("help")
 
 sentry_sdk.init(
@@ -46,6 +54,15 @@ async def delete_message(ctx):
                                                                                  discord.channel.GroupChannel):
         await ctx.message.delete()
 
+@client.event
+async def on_command_error(ctx, error):
+    if hasattr(ctx.command.cog, 'cog_command_error'):
+        return
+    if isinstance(error, discord.ext.commands.CommandNotFound):
+        client._mainlogger.warning(f"{ctx.author.name} ran {ctx.command} with {ctx.message.content}")
+    else:
+        client._mainlogger.error(f"Bot encountered error: {error}")
+        raise error
 
 @client.event
 async def on_ready():
