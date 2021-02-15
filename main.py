@@ -56,13 +56,13 @@ async def delete_message(ctx):
 
 @client.event
 async def on_command_error(ctx, error):
-    if hasattr(ctx.command.cog, 'cog_command_error'):
-        return
     if isinstance(error, discord.ext.commands.CommandNotFound):
         client._mainlogger.warning(f"{ctx.author.name} ran {ctx.command} with {ctx.message.content}")
-    else:
-        client._mainlogger.error(f"Bot encountered error: {error}")
-        raise error
+        return
+    if hasattr(ctx.command.cog, 'cog_command_error'):
+        return
+    client._mainlogger.error(f"Bot encountered error: {error}")
+    raise error
 
 @client.event
 async def on_ready():
