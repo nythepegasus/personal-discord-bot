@@ -3,6 +3,7 @@ import discord
 import json
 import sentry_sdk
 import logging
+from fuzzywuzzy import fuzz, process
 from discord.ext import commands
 
 sentry_sdk.init(
@@ -11,23 +12,21 @@ sentry_sdk.init(
 )
 
 
-class PhrasesCog(commands.Cog, name="Phrases Commands"):
+class PhrasesCog(commands.Cog, name="phrases"):
     def __init__(self, client):
         self.client = client
         self.client.phr_db_file = "db_files/phrases.json"
-        self.tonys_a_cunt = [
-            "\u0628",
-            "\u064d",
-            "\u0631",
-            "nigger",
-            "nigga"
-        ]
-        self.logger = logging.getLogger("PhrasesCog")
-        self.logger.setLevel(logging.DEBUG)
-        a_handler = logging.FileHandler("logs/phrases.log")
-        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
-        a_handler.setLevel(logging.DEBUG)
-        self.logger.addHandler(a_handler)
+
+    def word_check(self, msg):
+        rslur = ["retard", "r*tard", "ret*rd"]
+        nslur = ["nigger", "n*gger", "nigga", "n*gga"]
+        chks = process.extract(msg.lower(), nslur, scorer=fuzz.token_set_ratio) + process.extract(msg.lower(), rslur,
+                                                                                                  scorer=fuzz.token_set_ratio)
+        chks.sort(reverse=True)
+        for w in chks:
+            if w[1] > 90:
+                return (chks, True)
+        return (chks, False)
 
     async def cog_before_invoke(self, ctx):
         self.logger.info(f"{ctx.author.name} ran {ctx.command} with message {ctx.message.content}")
@@ -49,7 +48,7 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
             elif len(phrase) >= 35:
                 await ctx.send("Phrase too long!", delete_after=5)
                 return
-            elif any(bad in phrase.lower() for bad in self.tonys_a_cunt):
+            elif self.word_check(phrase)[1]:
                 await ctx.send("You're a cunt!", delete_after=5)
                 return
         add_phrase = {
@@ -163,10 +162,12 @@ class PhrasesCog(commands.Cog, name="Phrases Commands"):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        wchk = self.word_check(message.content)
         if message.author == self.client.user:
             return
-        if any(bad in message.content.lower() for bad in self.tonys_a_cunt):
+        if wchk[1]:
             await message.delete()
+            await message.author.send(f"Don't use the word \"{wchk[0][0][0]}\"!", delete_after=60)
             return
         self.update_phrase(message.content)
 
