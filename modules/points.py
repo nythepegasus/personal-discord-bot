@@ -24,7 +24,8 @@ class PointsCog(commands.Cog, name="points"):
         self.client.random_phrases = 'db_files/random_texts.json'
 
     async def cog_before_invoke(self, ctx):
-        self.logger.info(f"{ctx.author.name} ran {ctx.command} with message {ctx.message.content}")
+        # self.logger.info(f"{ctx.author.name} ran {ctx.command} with message {ctx.message.content}")
+        pass
 
     async def cog_after_invoke(self, ctx):
         if ctx.channel.name == "bot-commands" or ctx.channel.name == "mafia":
