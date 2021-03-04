@@ -25,7 +25,8 @@ class AmongUsCog(commands.Cog, name="Among Us Cog"):
         self.logger.addHandler(a_handler)
 
     async def cog_before_invoke(self, ctx):
-        self.logger.info(f"{ctx.author.name} ran {ctx.command} with message {ctx.message.content}")
+        # self.logger.info(f"{ctx.author.name} ran {ctx.command} with message {ctx.message.content}")
+        pass
 
     @tasks.loop(seconds=1)
     async def during_game(self):

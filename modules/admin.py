@@ -30,7 +30,8 @@ class AdminCog(commands.Cog, name="Admin Commands"):
         self.logger.addHandler(a_handler)
 
     async def cog_before_invoke(self, ctx):
-        self.logger.info(f"{ctx.author.name} ran {ctx.command} with message {ctx.message.content}")
+        # self.logger.info(f"{ctx.author.name} ran {ctx.command} with message {ctx.message.content}")
+        pass
 
     @commands.command(name="run", hidden=True)
     @commands.is_owner()
