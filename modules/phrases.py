@@ -22,7 +22,7 @@ class PhrasesCog(commands.Cog, name="phrases"):
         nslur = ["nigger", "n*gger", "nigga", "n*gga"]
         chks = process.extract(msg.lower(), nslur, scorer=fuzz.token_set_ratio) + process.extract(msg.lower(), rslur,
                                                                                                   scorer=fuzz.token_set_ratio)
-        chks.sort(keys=lambda x: x[1], reverse=True)
+        chks.sort(key=lambda x: x[1], reverse=True)
         for w in chks:
             if w[1] > 90:
                 return (chks, True)
