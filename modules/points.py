@@ -16,21 +16,25 @@ sentry_sdk.init(
     traces_sample_rate=1.0
 )
 
-class PointsCog(commands.Cog, name="Points Commands"):
+class PointsCog(commands.Cog, name="points"):
     def __init__(self, client: "Bot client"):
         self.client = client
         self.houses = ["Gryffindor", "Hufflepuff", "Ravenclaw", "Slytherin"]
         self.client.pts_db_file = 'db_files/points.json'
         self.client.random_phrases = 'db_files/random_texts.json'
-        self.logger = logging.getLogger("PointsCog")
-        self.logger.setLevel(logging.DEBUG)
-        a_handler = logging.FileHandler("logs/points.log")
-        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
-        a_handler.setLevel(logging.DEBUG)
-        self.logger.addHandler(a_handler)
 
     async def cog_before_invoke(self, ctx):
-        self.logger.info(f"{ctx.author.name} ran {ctx.command} with message {ctx.message.content}")
+        self._logger.info(f"{ctx.author.name} ran {ctx.command} with message {ctx.message.content}")
+
+    async def cog_after_invoke(self, ctx):
+        if ctx.channel.name == "bot-commands" or ctx.channel.name == "mafia":
+            h = await ctx.channel.history(limit=10).flatten()
+            for m in h:
+                if len(m.embeds) > 0:
+                    if m.embeds[0].title == "House Points":
+                        await m.edit(embed=self.house_points_emb())
+                        return
+            await ctx.send(embed=self.house_points_emb())
 
     class Player(object):
         def __init__(self, id: int, data: dict = None):
@@ -122,10 +126,9 @@ class PointsCog(commands.Cog, name="Points Commands"):
         data["cur_season"] += 1
         json.dump(data, open(self.client.pts_db_file, "w"), indent=4)
 
-    @commands.command(aliases=["hp"])
-    async def house_points(self, ctx):
+    def house_points_emb(self):
         data = json.load(open(self.client.pts_db_file))
-        house_emb = discord.Embed(title="House points", colour=0x00adff)
+        house_emb = discord.Embed(title="House Points", colour=0x00adff)
         for house in self.houses:
             house_points = 0
             for member in list(data["members"].keys()):
@@ -133,7 +136,14 @@ class PointsCog(commands.Cog, name="Points Commands"):
                 if house == cur_player.house:
                     house_points += sum(cur_player.points_earned)
             house_emb.add_field(name=house, value=str(house_points), inline=False)
-        await ctx.send(embed=house_emb)
+        return house_emb
+
+    @commands.command(aliases=["hp"])
+    async def house_points(self, ctx):
+        if self._scoreboard_message is None:
+            self._scoreboard_message = await ctx.send(embed=self.house_points_emb())
+        else:
+            await self._scoreboard_message.edit(embed=self.house_points_emb())
 
     @commands.cooldown(1, 180, commands.BucketType.user)
     @commands.command(aliases=["cs"])
