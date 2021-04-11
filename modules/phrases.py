@@ -88,31 +88,81 @@ class PhrasesCog(commands.Cog, name="phrases"):
         await ctx.send(string_to_print)
 
     @commands.command(aliases=['arp'])
-    async def add_rphrase(self, ctx, *, phrase):
+    async def add_rphrase(self, ctx: discord.Message):
         json_data = json.load(open(self.client.random_phrases))
-        args = phrase.split(" | ")
-        if args[0] not in ["spell", "steal", "beg"]:
-            return await ctx.send("Incorrect type specified!\nType must be `spell` or `steal` or `beg`!",
-                                  delete_after=7)
-        if args[0] == "beg" and args[1] not in ["win", "big"]:
-            return await ctx.send("Incorrect win type specified for beg command!\nMust be `win` or `big win`!",
-                                  delete_after=7)
-        if args[0] in ["spell", "steal"] and args[1] not in ["win", "lose"]:
-            return await ctx.send("Incorrect win type specified!\nMust be `win` or `lose`!", delete_after=7)
-        if len(args) not in [3, 4]:
-            return await ctx.send("Incorrect input! Please retype your phrase in the correct format.\n"
-                                  "`buh!add_phrase type | winlose | text with {house} and {points}` | author (optional)",
-                                  delete_after=15)
-        if "{house}" not in args[2] and "{points}" not in args[2]:
-            return await ctx.send("Phrase doesn't contain proper {house} and {points}! Retype it with proper braces!",
-                                  delete_after=10)
+        types = {'1️⃣': "spell", '2️⃣': "steal", '3️⃣': "beg"}
+        gl = {'1️⃣': "win", '2️⃣': "lose", ":beg_two:": "big win"}
+
+        async def checker(msg, check_func):
+            try:
+                reaction, user = await self.client.wait_for('reaction_add', timeout=30, check=check_func)
+                await msg.remove_reaction(emoji=reaction, member=user)
+                return reaction
+            except asyncio.TimeoutError:
+                return None
+
+        def type_emb_check(reaction, user):
+            return user == ctx.author and str(reaction.emoji) in ['1️⃣', '2️⃣', '3️⃣', '❌']
+
+        def gl_emb_check(reaction, user):
+            return user == ctx.author and str(reaction.emoji) in ['1️⃣', '2️⃣', '❌']
+
+        def msg_check(msg: discord.Message):
+            return msg.author == ctx.author
+
+        type_emb = discord.Embed(title="Choose Type of Phrase", colour=0x3b88c3)
+        type_emb.add_field(name="1️⃣ Spell\n\n2️⃣ Steal\n\n3️⃣ Beg", value="\u200b", inline=False)
+        gl_emb = discord.Embed(title="Choose Points", colour=0x3b88c3)
+        user_msg = await ctx.send(embed=type_emb)
+        await user_msg.add_reaction(emoji='1️⃣')
+        await user_msg.add_reaction(emoji="2️⃣")
+        await user_msg.add_reaction(emoji="3️⃣")
+        await user_msg.add_reaction(emoji="❌")
+
+        react = await checker(user_msg, type_emb_check)
+
+        if not react:
+            await user_msg.delete()
+            return await ctx.send("Reaction timeout reached!", delete_after=7)
+        elif str(react.emoji) == "❌":
+            await user_msg.delete()
+            return await ctx.send("Process cancelled by user!", delete_after=7)
+        elif str(react.emoji) == "3️⃣":
+            gl_emb.add_field(name="1️⃣ Win\n\n2️⃣ Big Win", value="\u200b", inline=False)
+        else:
+            gl_emb.add_field(name="1️⃣ Win\n\n2️⃣ Lose", value="\u200b", inline=False)
+
+        await user_msg.edit(embed=gl_emb)
+
+        await user_msg.clear_reaction(emoji="3️⃣")
+        react2 = await checker(user_msg, gl_emb_check)
+
+        if not react2:
+            await user_msg.delete()
+            return await ctx.send("Reaction timeout reached!", delete_after=7)
+        elif str(react2.emoji) == "❌":
+            await user_msg.delete()
+            return await ctx.send("Process cancelled by user!", delete_after=7)
+
+        await user_msg.delete()
+        t = await ctx.send(content="```Please input your phrase with {house} and {points} included!```")
+
+        msg = await self.client.wait_for('message', timeout=60, check=msg_check)
+
+        if "{house}" not in msg.content and "{points}" not in msg.content:
+            await t.delete()
+            return await ctx.send("Your message must contain {house} and {points}!", delete_after=7)
+
         phrase_to_add = {
-            'type': args[0],
-            'points': args[1],
-            'text': args[2],
-            'author': args[3] if len(args) == 4 else ctx.author.nick or ctx.author.name,
+            'type': types[str(react.emoji)],
+            'points': gl[":beg_two:"] if str(react.emoji) == "3️⃣" and str(react2.emoji) == "2️⃣" else gl[str(react2.emoji)],
+            'text': msg.content,
+            'author': ctx.author.nick or ctx.author.name,
             'pos': len(json_data['queue'])
         }
+
+        await t.delete()
+
         json_data["queue"].append(phrase_to_add)
         json.dump(json_data, open(self.client.random_phrases, 'w'), indent=4)
         await ctx.send("Phrase added to queue, hopefully you'll see it soon! ;)", delete_after=10)
