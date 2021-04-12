@@ -3,6 +3,7 @@ import typing
 import discord
 import json
 import sentry_sdk
+import reactionmenu as rm
 import logging
 from fuzzywuzzy import fuzz, process
 from discord.ext import commands
@@ -91,10 +92,12 @@ class PhrasesCog(commands.Cog, name="phrases"):
     @commands.command(name="phrase_counts", aliases=["pc"])
     async def phrase_counts(self, ctx):
         data = json.load(open(self.client.phr_db_file))
-        string_to_print = ""
+        menu = rm.ReactionMenu(ctx, name="Phrase Counts", back_button='◀️', next_button='▶️', config=rm.ReactionMenu.DYNAMIC, rows_requested=5)
         for phrase in data["phrases"]:
-            string_to_print += f"{phrase['phrase']}: {phrase['times_said']}\n"
-        await ctx.send(string_to_print)
+            menu.add_row(f"{phrase['phrase']}: {phrase['times_said']}\n")
+        await menu.start()
+        await asyncio.sleep(60)
+        await menu.stop(delete_menu_message=True)
 
     @commands.command(aliases=['arp'])
     async def add_rphrase(self, ctx: discord.Message):
