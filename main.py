@@ -47,6 +47,7 @@ async def delete_message(ctx):
        not isinstance(ctx.channel, discord.channel.GroupChannel):
         await ctx.message.delete()
 
+
 @client.event
 async def on_ready():
     funny_activity = discord.Game(name="with my 3 inch thick yogurt slinger")  # This could be in the conf file as well
@@ -54,9 +55,19 @@ async def on_ready():
     for guild in client.guilds:
         print(f"Tester in {guild}")
 
+
 @client.event
 async def on_message_delete(msg):
     with open("logs/deleted_messages.log", "a") as f:
         f.write(f"[{str(msg.created_at)}] {msg.author.name}: {msg.content}")
+
+
+@client.event
+async def on_raw_reaction_add(reaction):
+    if str(reaction.emoji.name) == '🗑️':
+        channel = await client.fetch_channel(reaction.channel_id)
+        msg = await channel.fetch_message(reaction.message_id)
+        if msg.author == client.user:
+            await msg.delete()
 
 client.run(TOKEN)
