@@ -7,11 +7,6 @@ import sentry_sdk
 import json
 from discord.ext import commands
 
-sentry_sdk.init(
-    json.load(open("conf_files/conf.json", "r"))["sentry_sdk"],
-    traces_sample_rate=1.0
-)
-
 
 class AdminCog(commands.Cog, name="Admin Commands"):
     def __init__(self, client):

@@ -10,11 +10,6 @@ import uptime
 from discord.ext import commands
 import pushover
 
-sentry_sdk.init(
-    json.load(open("conf_files/conf.json", "r"))["sentry_sdk"],
-    traces_sample_rate=1.0
-)
-
 
 class UtilCog(commands.Cog, name="Utility Commands"):
     def __init__(self, client):
