@@ -4,7 +4,6 @@ import discord
 import json
 import psutil
 import sentry_sdk
-import logging
 import speedtest
 import time
 import uptime
@@ -20,16 +19,6 @@ sentry_sdk.init(
 class UtilCog(commands.Cog, name="Utility Commands"):
     def __init__(self, client):
         self.client = client
-        self.logger = logging.getLogger("UtilCog")
-        self.logger.setLevel(logging.DEBUG)
-        a_handler = logging.FileHandler("logs/util.log")
-        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
-        a_handler.setLevel(logging.DEBUG)
-        self.logger.addHandler(a_handler)
-
-    async def cog_before_invoke(self, ctx):
-        # self.logger.info(f"{ctx.author.name} ran {ctx.command} with message {ctx.message.content}")
-        pass
 
     @commands.command(aliases=["h"])
     async def help(self, ctx):

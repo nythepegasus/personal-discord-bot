@@ -2,7 +2,6 @@ import asyncio
 import json
 import discord
 import sentry_sdk
-import logging
 from discord.ext import commands, tasks
 
 sentry_sdk.init(
@@ -17,16 +16,6 @@ class AmongUsCog(commands.Cog, name="Among Us Cog"):
         self.vc = None
         self.voting_time = None
         self.client.au_db_file = "db_files/amongus.json"
-        self.logger = logging.getLogger("AmongUsCog")
-        self.logger.setLevel(logging.DEBUG)
-        a_handler = logging.FileHandler("logs/amongus.log")
-        a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
-        a_handler.setLevel(logging.DEBUG)
-        self.logger.addHandler(a_handler)
-
-    async def cog_before_invoke(self, ctx):
-        # self.logger.info(f"{ctx.author.name} ran {ctx.command} with message {ctx.message.content}")
-        pass
 
     @tasks.loop(seconds=1)
     async def during_game(self):

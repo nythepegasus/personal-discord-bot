@@ -4,7 +4,6 @@ import discord
 import json
 import sentry_sdk
 import reactionmenu as rm
-import logging
 from fuzzywuzzy import fuzz, process
 from discord.ext import commands
 
@@ -29,10 +28,6 @@ class PhrasesCog(commands.Cog, name="phrases"):
             if w[1] > 90:
                 return (chks, True)
         return (chks, False)
-
-    async def cog_before_invoke(self, ctx):
-        # self.logger.info(f"{ctx.author.name} ran {ctx.command} with message {ctx.message.content}")
-        pass
 
     async def checker(self, msg: discord.Message, check_func, timeout: int = 30) -> typing.Union[discord.Reaction, None]:
         try:
