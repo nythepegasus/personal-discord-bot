@@ -1,12 +1,9 @@
-import os
 import sys
 import json
 import traceback
 import discord
-import zipfile
 import sentry_sdk
 import pushover
-import logging
 from discord.ext import commands
 
 # These should come from a conf file, the TOKEN, command_prefix, and owner_id (and others if need be)
