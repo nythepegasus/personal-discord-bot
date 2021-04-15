@@ -201,14 +201,14 @@ class PointsCog(commands.Cog, name="points"):
         plt.xticks([float(i) for i in range(0, len(cur_player_diffs) + 1)])
         plt.yticks([float(i) for i in range(0, (max(cur_player_diffs) // 10 * 10) + 10, 10)])
         plt.grid(True)
-        plt.savefig("{}.png".format(cur_player.id))
+        plt.savefig("{}.png".format(data['name']))
         emb = discord.Embed(
-            title="{} Stats".format(cur_player.display_name),
+            title="{} Stats".format(data['name']),
             description="X-Axis is the amount of bot commands\nY-Axis is the amount of points."
         )
         await ctx.send(embed=emb)
-        await ctx.send(file=discord.File("{}.png".format(cur_player.id)))
-        os.remove("{}.png".format(cur_player.id))
+        await ctx.send(file=discord.File("{}.png".format(data['name'])))
+        os.remove("{}.png".format(data['name']))
 
     @commands.Cog.listener()
     async def on_guild_channel_pins_update(self, channel, last_pin):
