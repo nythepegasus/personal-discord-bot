@@ -98,25 +98,6 @@ class AdminCog(commands.Cog, name="Admin Commands"):
         else:
             await ctx.send(f"`{cog}` has been reloaded!", delete_after=5)
 
-    def filter_message(self, message):
-        message = message.replace(" ", "")
-        regexes = [  # Probably use this as a config list in a json file
-            r"(n|ñ|ń)+.*(i|î|ï|í|ī|ī|į|ì)+.*g{2,}.*(a|à|á|â|ä|æ|ã|å|ā)*.*",
-            r"(n|ñ|ń)+.*(i|î|ï|í|ī|ī|į|ì)+.*g{2,}.*(e|è|é|ê|ë|ē|ė|ę)*.*r*.*"
-        ]
-        for reg in regexes:
-            matches = re.finditer(reg, message, re.MULTILINE)
-            for matchNum, match in enumerate(matches, start=1):
-                test = matchNum
-            try:
-                tester = test
-                print("Bad stuff afloat!")
-                return True
-                break
-            except NameError:
-                print("Nothing bad here!")
-                return False
-
     @commands.Cog.listener()
     async def on_message(self, message):
         if any(bad in message.content for bad in self.tonys_a_cunt):
