@@ -15,21 +15,17 @@ if conf_data["TOKEN"] == "" or conf_data["command_prefix"] == "" or conf_data["o
     print("You need to set up conf.json!")
     exit(1)
 TOKEN = conf_data["TOKEN"]
+
 intents = discord.Intents().all()
 client = commands.Bot(command_prefix=conf_data["command_prefix"], intents=intents)
 client.owner_id = int(conf_data["owner_id"])
+
 psh_data = conf_data['pushover']
-if psh_data['user_key'] is not "" and psh_data['api_key'] is not "":
+if psh_data['user_key'] != "" and psh_data['api_key'] != "":
     client.pshovr = pushover.Client(user_key=psh_data['user_key'],
                                     api_token=psh_data['api_key'])
 else:
     client.pshovr = None
-client._mainlogger = logging.getLogger("BotGeneral")
-client._mainlogger.setLevel(logging.DEBUG)
-a_handler = logging.FileHandler("logs/bot.log")
-a_handler.setFormatter(logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s"))
-a_handler.setLevel(logging.DEBUG)
-client._mainlogger.addHandler(a_handler)
 
 client.remove_command("help")
 
@@ -50,19 +46,9 @@ for extension in conf_data["modules"]:
 
 @client.before_invoke
 async def delete_message(ctx):
-    if not isinstance(ctx.channel, discord.channel.DMChannel) and not isinstance(ctx.channel,
-                                                                                 discord.channel.GroupChannel):
+    if not isinstance(ctx.channel, discord.channel.DMChannel) and \
+       not isinstance(ctx.channel, discord.channel.GroupChannel):
         await ctx.message.delete()
-
-@client.event
-async def on_command_error(ctx, error):
-    if isinstance(error, discord.ext.commands.CommandNotFound):
-        client._mainlogger.warning(f"{ctx.author.name} ran {ctx.command} with {ctx.message.content}")
-        return
-    if hasattr(ctx.command.cog, 'cog_command_error'):
-        return
-    client._mainlogger.error(f"Bot encountered error: {error}")
-    raise error
 
 @client.event
 async def on_ready():
@@ -71,10 +57,9 @@ async def on_ready():
     for guild in client.guilds:
         print(f"Tester in {guild}")
 
-# @client.event
-# async def on_error(error):
-#    f, p = traceback.format_exc(), traceback.print_exc()
-#    sentry_sdk.capture_exception(f)
-#    print(p)
+@client.event
+async def on_message_delete(msg):
+    with open("logs/deleted_messages.log", "a") as f:
+        f.write(f"[{str(msg.created_at)}] {msg.author.name}: {msg.content}")
 
 client.run(TOKEN)
