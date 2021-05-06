@@ -16,8 +16,8 @@ class PhrasesCog(commands.Cog, name="phrases"):
     def word_check(self, msg):
         rslur = ["retard", "r*tard", "ret*rd"]
         nslur = ["nigger", "n*gger", "nigga", "n*gga"]
-        chks = process.extract(msg.lower(), nslur, scorer=fuzz.token_set_ratio) + process.extract(msg.lower(), rslur,
-                                                                                                  scorer=fuzz.token_set_ratio)
+        chks = process.extract(msg.lower(), nslur, scorer=fuzz.token_sort_ratio) + process.extract(msg.lower(), rslur,
+                                                                                                  scorer=fuzz.token_sort_ratio)
         chks.sort(key=lambda x: x[1], reverse=True)
         for w in chks:
             if w[1] > 90:
@@ -238,11 +238,11 @@ class PhrasesCog(commands.Cog, name="phrases"):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        wchk = self.word_check(message.content)
         if message.author == self.client.user:
             return
         if "buh!" in message.content:
             return
+        wchk = self.word_check(message.content)
         if wchk[1]:
             await message.delete()
             await message.author.send(f"Don't use the word \"{wchk[0][0][0]}\"!", delete_after=60)
