@@ -58,8 +58,12 @@ async def on_ready():
 
 @client.event
 async def on_message_delete(msg):
+    if msg.author == client.user:
+        return
+    elif "buh!" in msg.content:
+        return
     with open("logs/deleted_messages.log", "a") as f:
-        f.write(f"[{str(msg.created_at)}] {msg.author.name}: {msg.content}")
+        f.write(f"[{str(msg.created_at)}] {msg.author.name}: {msg.content}\n")
 
 
 @client.event
