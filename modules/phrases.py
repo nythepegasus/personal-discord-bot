@@ -245,7 +245,6 @@ class PhrasesCog(commands.Cog, name="phrases"):
         wchk = self.word_check(message.content)
         if wchk[1]:
             await message.delete()
-            await message.author.send(f"Don't use the word \"{wchk[0][0][0]}\"!", delete_after=60)
             return
         self.update_phrase(message.content)
 
