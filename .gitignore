@@ -9,3 +9,4 @@ logs/
 *.json
 test.py
 *.old
+*.swp
