@@ -1,11 +1,11 @@
 import asyncio
+import string
 import typing
 import discord
-import string
 import reactionmenu as rm
-from more_itertools import chunked
-from fuzzywuzzy import fuzz, process
 from discord.ext import commands
+from fuzzywuzzy import fuzz, process
+from more_itertools import chunked
 from utils.schema import Phrase, PhraseCount, Player, RandomText
 
 
@@ -13,7 +13,6 @@ class PhrasesCog(commands.Cog, name="Phrases"):
     def __init__(self, client):
         self.client = client
         self.description = "This module adds phrases tracking, random phrases for Points Module, along with other things."
-        self.client.phr_db_file = "db_files/phrases.json"
 
     def word_check(self, msg):
         rslur = ["retard", "r*tard", "ret*rd"]

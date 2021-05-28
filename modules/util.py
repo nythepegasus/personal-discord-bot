@@ -1,8 +1,8 @@
+import time
 import arrow
 import discord
 import psutil
 import speedtest
-import time
 import uptime
 from discord.ext import commands
 

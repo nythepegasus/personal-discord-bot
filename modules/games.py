@@ -1,10 +1,10 @@
+import asyncio
 import json
 import random
-import discord
-import asyncio
 import typing
-from pathlib import Path
+import discord
 from discord.ext import commands
+
 from utils.schema import TriviaQuestion, TriviaAnswer, Player, Points
 
 
