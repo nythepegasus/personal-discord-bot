@@ -84,7 +84,3 @@ class AmongUsCog(commands.Cog, name="Among Us"):
             return await ctx.send("Player is not in the correct VC anymore!\nCannot perform actions on them.")
         else:
             return await ctx.send(f"Something went wrong!\n{error}")
-
-
-def setup(client):
-    client.add_cog(AmongUsCog(client))
