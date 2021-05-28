@@ -80,12 +80,3 @@ class TriviaAnswer(Document):
     correct = IntField()
     wrong = IntField()
     meta = {"collection": "trivia_responses"}
-
-if __name__ == "__main__":
-    import mongoengine
-    import json
-    conf_data = json.load(open("conf_files/conf.json"))
-    mongoconf = conf_data['mongodb']
-    mongoengine.connect(host=f"mongodb://{mongoconf['user']}:{mongoconf['password']}@"
-                             f"{mongoconf['ipport']}/{mongoconf['db']}?authSource=admin", )
-    print("Connected to MongoDB!")
