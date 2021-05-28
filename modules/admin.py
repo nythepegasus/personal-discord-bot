@@ -1,23 +1,24 @@
-import re
-import discord
 import inspect
 import contextlib
 import io
-import sentry_sdk
-import json
 from discord.ext import commands
 
 
-class AdminCog(commands.Cog, name="Admin Commands"):
+class AdminCog(commands.Cog, name="Admin"):
     def __init__(self, client):
         self.client = client
+        self.description = "This module is meant to be used by the owner of the bot."
         self.tonys_a_cunt = [
             "\u0628",
             "\u064d",
             "\u0631",
         ]
 
-    @commands.command(name="run", hidden=True)
+    @commands.command(name="run", hidden=True,
+                      help="Executes Python code from Discord on the bot.\n"
+                           "(Can be dangerous, reserved for only the owner)",
+                      brief="Executes Python code.",
+                      usage="```py <code> ```")
     @commands.is_owner()
     async def run(self, ctx, *, code):
         code = code.replace('```py', '')
@@ -45,7 +46,8 @@ class AdminCog(commands.Cog, name="Admin Commands"):
         if str_obj.getvalue() != "":
             await ctx.send(f'```{str_obj.getvalue()}```')
 
-    @commands.command(name='load', hidden=True)
+    @commands.command(name='load', hidden=True, help="Loads a cog into the bot to extend bot functionality.",
+                      brief="Loads a cog.")
     @commands.is_owner()
     async def load(self, ctx, *, cog: str):
         """Command which Loads a Module."""
@@ -56,7 +58,7 @@ class AdminCog(commands.Cog, name="Admin Commands"):
         else:
             await ctx.send(f"`{cog}` has been loaded!", delete_after=5)
 
-    @commands.command(name='unload', hidden=True)
+    @commands.command(name='unload', hidden=True, help="Unloads a cog from the bot.", brief="Unloads a cog.")
     @commands.is_owner()
     async def unload(self, ctx, *, cog: str):
         """Command which Unloads a Module."""
@@ -70,7 +72,9 @@ class AdminCog(commands.Cog, name="Admin Commands"):
         else:
             await ctx.send(f"`{cog}` has been unloaded!", delete_after=5)
 
-    @commands.command(name='reload', hidden=True)
+    @commands.command(name='reload', hidden=True,
+                      help="Reloads a cog into the bot.\nUseful for when updating the cogs separate from the bot.",
+                      brief="Reloads a cog.")
     @commands.is_owner()
     async def reload(self, ctx, *, cog: str):
         """Command which Reloads a Module."""

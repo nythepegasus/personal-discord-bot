@@ -1,95 +1,75 @@
-import asyncio
-import datetime
+import arrow
 import discord
-import json
 import psutil
-import sentry_sdk
 import speedtest
 import time
 import uptime
 from discord.ext import commands
-import pushover
 
 
-class UtilCog(commands.Cog, name="Utility Commands"):
+class UtilCog(commands.Cog, name="Utility"):
     def __init__(self, client):
         self.client = client
+        self.description = "This module adds various utility functions."
 
     @commands.command(aliases=["h"])
-    async def help(self, ctx):
-        help_emb = discord.Embed(title="Bot Commands", colour=0x00adff)
-        help_emb.add_field(name="buh!add_phrase | buh!ap", value="Add phrase to the tracker", inline=False)
-        help_emb.add_field(name="buh!remove_phrase | buh!rp", value="Remove phrase from the tracker", inline=False)
-        help_emb.add_field(name="buh!phrases_counts | buh!pc", value="Check phrases on the tracker", inline=False)
-        help_emb.add_field(name="buh!archive_pins | buh!arcp", value="Archive all pins from #general chat",
-                           inline=False)
-        help_emb.add_field(name="buh!house_points | buh!hp", value="Check each house's points.", inline=False)
-        help_emb.add_field(name="buh!cast_spell | buh!cs",
-                           value="Gamble your house's points away, and see where fate takes you.", inline=False)
-        help_emb.add_field(name="buh!stats", value="Check the discord bot's current server stats", inline=False)
-        help_emb.add_field(name="buh!netstats", value="Check the discord bot's current net stats", inline=False)
-        help_emb.add_field(name="More to come!", value=":3", inline=False)
-        help_emb.set_footer(text="Developed by Nikki")
-        await ctx.send(embed=help_emb)
+    async def help(self, ctx, query=None):
+        if query is not None:
+            com = self.client.get_command(query.lower())
+            cog = self.client.get_cog(query.capitalize())
+            if com:
+                help_emb = discord.Embed(title=com.name, description=com.help)
+                help_emb.set_footer(text=f"Command provided by {self.client.user.display_name}")
+                return await ctx.send(embed=help_emb, delete_after=20)
+            elif cog:
+                help_emb = discord.Embed(title=cog.qualified_name, description=cog.description)
+                for command in cog.get_commands():
+                    help_emb.add_field(name=command.name, value=command.brief, inline=False)
+                help_emb.set_footer(text=f"Cog provided by {self.client.user.display_name}")
+                return await ctx.send(embed=help_emb, delete_after=20)
+            else:
+                help_emb = discord.Embed(title="Error! Unknown query.", description=f"{query} is not a known command or cog!")
+                help_emb.set_footer(text=f"For more help, type {self.client.command_prefix}help")
+                await ctx.send(embed=help_emb, delete_after=30)
+        else:
+            help_emb = discord.Embed(title=f"{self.client.user.display_name}'s Cogs")
+            for cog in self.client.cogs:
+                description = self.client.cogs[cog].description
+                help_emb.add_field(name=cog, value=description if len(description) != 0 else f"{cog} adds commands!")
+            help_emb.set_footer(text=f"For more help on a cog or command, type {self.client.command_prefix}help <query>")
+            return await ctx.send(embed=help_emb, delete_after=20)
 
-    @commands.command(name="archive_pins", aliases=["arcp"])
     @commands.is_owner()
+    @commands.command(name="archive_pins", aliases=["arcp"])
     async def archive_pins(self, ctx):
-        guild = self.client.guilds[0]
-        for channel in guild.channels:
-            if channel.name == "general":
-                general_chat = channel
-            if channel.name == "archived-pins":
-                archive_channel = channel
+        """Archives the pins in #general into #archived-pins"""
+        general_chat = discord.utils.get(ctx.guild.channels, name="general")
+        archive_channel = discord.utils.get(ctx.guild.channels, name="archived-pins")
         myPins = await general_chat.pins()
-        if len(myPins) == 50:
-            conf_data = json.load(open("db_files/points.json"))
-            json.dump(conf_data, open("db_files/points.json", "w"), indent=4)
-        elif len(myPins) == 0:
+        if len(myPins) == 0:
             await ctx.send("No more pins")
             return
         for pin in myPins:
-            emb = discord.Embed(
-                description=pin.content,
-                timestamp=datetime.datetime.utcfromtimestamp(int(time.time())),
-            )
-            emb.set_author(
-                name=pin.author,
-                icon_url=pin.author.avatar_url,
-                url="https://discordapp.com/channels/{0}/{1}/{2}".format(
-                    pin.guild.id, pin.channel.id, pin.id)
-            )
             if pin.attachments:
-                if len(pin.attachments) > 1:
-                    img_url = pin.attachments[0].url
-                    emb.set_image(url=img_url)
-                    emb.set_footer(text=f"Part 1 | Archived from #{pin.channel} | {pin.jump_url}")
-                    await archive_channel.send(embed=emb)
-                    attach_counter = 1
-                    try:
-                        for attachment in pin.attachments:
-                            next_emb = discord.Embed(
-                                timestamp=datetime.datetime.utcfromtimestamp(int(time.time())),
-                            )
-                            next_emb.set_author(
-                                name=pin.author,
-                                icon_url=pin.author.avatar_url,
-                                url="https://discordapp.com/channels/{0}/{1}/{2}".format(
-                                    pin.guild.id, pin.channel.id, pin.id)
-                            )
-                            img_url = pin.attachments[attach_counter].url
-                            next_emb.set_image(url=img_url)
-                            next_emb.set_footer(text=f"Part {attach_counter + 1} | Archived from #{pin.channel}")
-                            attach_counter += 1
-                            await archive_channel.send(embed=next_emb)
-                    except IndexError:
-                        pass
-                elif len(pin.attachments) == 1:
-                    img_url = pin.attachments[0].url
-                    emb.set_image(url=img_url)
-                    emb.set_footer(text=f"Archived from #{pin.channel}")
-                    await archive_channel.send(embed=emb)
+                for attachment in pin.attachments:
+                    next_emb = discord.Embed(description=pin.content, timestamp=arrow.now())
+                    next_emb.set_author(name=pin.author,
+                                        icon_url=pin.author.avatar_url,
+                                        url=f"https://discord.com/channels/{pin.guild.id}/{pin.channel.id}/{pin.id}")
+                    next_emb.set_image(url=attachment.url)
+                    next_emb.set_footer(text=f"Part {pin.attachments.index(attachment) + 1} | Archived from #{pin.channel}")
+                    await archive_channel.send(embed=next_emb)
             else:
+                emb = discord.Embed(
+                    description=pin.content,
+                    timestamp=arrow.now(),
+                )
+                emb.set_author(
+                    name=pin.author,
+                    icon_url=pin.author.avatar_url,
+                    url=f"https://discord.com/channels/{pin.guild.id}/{pin.channel.id}/{pin.id}"
+                )
+                emb.set_footer(text=f"Archived from #{pin.channel}")
                 await archive_channel.send(embed=emb)
             await pin.unpin()
         await ctx.send(f"Archived the pins! Check them out in #{archive_channel}!")
@@ -124,17 +104,6 @@ class UtilCog(commands.Cog, name="Utility Commands"):
             await ctx.send(f"Wait {round(error.retry_after, 2)} more seconds.", delete_after=5)
         else:
             raise error
-
-    @commands.cooldown(1, 15)
-    @commands.command()
-    async def feature_request(self, ctx, *, suggestion):
-        json_data = json.load(open(self.client.conf_file))
-        pshovr = pushover.Client(user_key=json_data['pushover']['user_key'],
-                                 api_token=json_data['pushover']['api_key'])
-        pshovr.send(pushover.Message(suggestion, title="Discord Suggestion!"))
-        await ctx.send(
-            "Your feature has been suggested, " + self.client.owner.mention + " will (probably) get to work on it soon!",
-            delete_after=10)
 
 
 def setup(client):

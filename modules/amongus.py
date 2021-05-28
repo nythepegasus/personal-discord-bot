@@ -1,11 +1,10 @@
 import asyncio
 import json
 import discord
-import sentry_sdk
 from discord.ext import commands, tasks
 
 
-class AmongUsCog(commands.Cog, name="Among Us Cog"):
+class AmongUsCog(commands.Cog, name="Among Us"):
     def __init__(self, client):
         self.client = client
         self.vc = None
