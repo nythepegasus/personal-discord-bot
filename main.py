@@ -2,9 +2,11 @@ import sys
 import json
 import traceback
 import discord
+import mongoengine
 import sentry_sdk
 import pushover
 from discord.ext import commands
+from utils.schema import CommandUsage, Player
 
 # These should come from a conf file, the TOKEN, command_prefix, and owner_id (and others if need be)
 conf_data = json.load(open("conf_files/conf.json"))
@@ -24,6 +26,11 @@ if psh_data['user_key'] != "" and psh_data['api_key'] != "":
 else:
     client.pshovr = None
 
+mongoconf = conf_data['mongodb']
+mongoengine.connect(host=f"mongodb://{mongoconf['user']}:{mongoconf['password']}@"
+                         f"{mongoconf['ipport']}/{mongoconf['db']}?authSource=admin",)
+print("Connected to MongoDB!")
+
 client.remove_command("help")
 
 sentry_sdk.init(
@@ -41,11 +48,22 @@ for extension in conf_data["modules"]:
         traceback.print_exc()
 
 
-@client.before_invoke
-async def delete_message(ctx):
+async def command_usage(ctx: commands.Context):
+    player = Player.objects(dis_id=str(ctx.author.id)).first()
+    CommandUsage.objects(command=ctx.command.name, said=player).upsert_one(
+                        inc__times=1, set__command=ctx.command.name, set__said=player)
+
+
+async def delete_message(ctx: commands.Context):
     if not isinstance(ctx.channel, discord.channel.DMChannel) and \
-       not isinstance(ctx.channel, discord.channel.GroupChannel):
+            not isinstance(ctx.channel, discord.channel.GroupChannel):
         await ctx.message.delete()
+
+
+@client.before_invoke
+async def before_invoke(ctx):
+    await command_usage(ctx)
+    await delete_message(ctx)
 
 
 @client.event

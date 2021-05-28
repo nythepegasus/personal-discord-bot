@@ -1,30 +1,33 @@
 import asyncio
 import typing
 import discord
-import json
-import sentry_sdk
+import string
 import reactionmenu as rm
+from more_itertools import chunked
 from fuzzywuzzy import fuzz, process
 from discord.ext import commands
+from utils.schema import Phrase, PhraseCount, Player, RandomText
 
 
-class PhrasesCog(commands.Cog, name="phrases"):
+class PhrasesCog(commands.Cog, name="Phrases"):
     def __init__(self, client):
         self.client = client
+        self.description = "This module adds phrases tracking, random phrases for Points Module, along with other things."
         self.client.phr_db_file = "db_files/phrases.json"
 
     def word_check(self, msg):
         rslur = ["retard", "r*tard", "ret*rd"]
         nslur = ["nigger", "n*gger", "nigga", "n*gga"]
         chks = process.extract(msg.lower(), nslur, scorer=fuzz.token_sort_ratio) + process.extract(msg.lower(), rslur,
-                                                                                                  scorer=fuzz.token_sort_ratio)
+                                                                                                   scorer=fuzz.token_sort_ratio)
         chks.sort(key=lambda x: x[1], reverse=True)
         for w in chks:
             if w[1] > 90:
                 return (chks, True)
         return (chks, False)
 
-    async def checker(self, msg: discord.Message, check_func, timeout: int = 30) -> typing.Union[discord.Reaction, None]:
+    async def checker(self, msg: discord.Message, check_func, timeout: int = 30) -> typing.Union[
+        discord.Reaction, None]:
         try:
             reaction, user = await self.client.wait_for('reaction_add', timeout=timeout, check=check_func)
             await msg.remove_reaction(emoji=reaction, member=user)
@@ -34,64 +37,35 @@ class PhrasesCog(commands.Cog, name="phrases"):
 
     @commands.command(name="add_phrase", aliases=["ap"])
     async def add_phrase(self, ctx, phrase):
-        data = json.load(open(self.client.phr_db_file))
-        try:
-            cur_index = data["phrases"][-1]["uid"] + 1
-        except IndexError:
-            cur_index = 1
-        for line in data["phrases"]:
-            if phrase == line["phrase"]:
-                await ctx.send("Phrase already exists!", delete_after=5)
-                return
-            elif len(phrase) <= 2:
-                await ctx.send("Phrase too short!", delete_after=5)
-                return
-            elif len(phrase) >= 35:
-                await ctx.send("Phrase too long!", delete_after=5)
-                return
-            elif self.word_check(phrase)[1]:
-                await ctx.send("You're a cunt!", delete_after=5)
-                return
-        add_phrase = {
-            "uid": cur_index,
-            "phrase": phrase,
-            "times_said": 0,
-        }
-        with open(self.client.phr_db_file, "w") as f:
-            data["phrases"].append(add_phrase)
-            f.write(json.dumps(data, indent=4))
-            await ctx.send("Phrase added!", delete_after=5)
-
-    def update_phrase(self, phrase):
-        data = json.load(open(self.client.phr_db_file))
-        for d in data["phrases"]:
-            if d.get("phrase").lower() in phrase.lower():
-                d["times_said"] += 1
-        with open(self.client.phr_db_file, "w") as f:
-            f.write(json.dumps(data, indent=4))
-            return "Updated phrase!"
+        exists = True if Phrase.objects(phrase=phrase).first() is not None else False
+        if exists:
+            return await ctx.send("Phrase already exists!", delete_after=7)
+        elif len(phrase) < 3:
+            return await ctx.send("Phrase too short!", delete_after=7)
+        elif len(phrase) > 35:
+            return await ctx.send("Phrase too long!", delete_after=7)
+        elif self.word_check(phrase)[1]:
+            return await ctx.send("Phrase cannot be approved!", delete_after=7)
+        Phrase(phrase=phrase, adder=ctx.author.name).save()
+        await ctx.send("Phrase added!", delete_after=10)
 
     @commands.command(name="remove_phrase", aliases=["rp"])
     async def remove_phrase(self, ctx, phrase):
-        data = json.load(open(self.client.phr_db_file))
-        with open(self.client.phr_db_file, "w") as f:
-            data["phrases"] = [d for d in data["phrases"] if d.get("phrase") != phrase]
-            f.write(json.dumps(data, indent=4))
-            await ctx.send("Removed phrase!", delete_after=5)
+        Phrase.objects(phrase=phrase).delete()
+        await ctx.send("Removed phrase!", delete_after=10)
 
     @commands.command(name="phrase_counts", aliases=["pc"])
     async def phrase_counts(self, ctx):
-        data = json.load(open(self.client.phr_db_file))
-        menu = rm.ReactionMenu(ctx, name="Phrase Counts", back_button='◀️', next_button='▶️', config=rm.ReactionMenu.DYNAMIC, rows_requested=5)
-        for phrase in data["phrases"]:
-            menu.add_row(f"{phrase['phrase']}: {phrase['times_said']}\n")
+        menu = rm.ReactionMenu(ctx, name="Phrase Counts", back_button='◀️', next_button='▶️',
+                               config=rm.ReactionMenu.DYNAMIC, rows_requested=5)
+        for phrase in Phrase.objects:
+            menu.add_row(f"{phrase.phrase}: {sum(p.times for p in PhraseCount.objects(phrase=phrase))}\n")
         await menu.start()
         await asyncio.sleep(60)
         await menu.stop(delete_menu_message=True)
 
     @commands.command(aliases=['arp'])
     async def add_rphrase(self, ctx: discord.Message):
-        json_data = json.load(open(self.client.random_phrases))
         types = {'1️⃣': "spell", '2️⃣': "steal", '3️⃣': "beg"}
         gl = {'1️⃣': "win", '2️⃣': "lose", ":beg_two:": "big win"}
 
@@ -108,10 +82,8 @@ class PhrasesCog(commands.Cog, name="phrases"):
         type_emb.add_field(name="1️⃣ Spell\n\n2️⃣ Steal\n\n3️⃣ Beg", value="\u200b", inline=False)
         gl_emb = discord.Embed(title="Choose Points", colour=0x3b88c3)
         user_msg = await ctx.send(embed=type_emb)
-        await user_msg.add_reaction(emoji='1️⃣')
-        await user_msg.add_reaction(emoji="2️⃣")
-        await user_msg.add_reaction(emoji="3️⃣")
-        await user_msg.add_reaction(emoji="❌")
+        for emoji in ["1️⃣", "2️⃣", "3️⃣", "❌"]:
+            await user_msg.add_reaction(emoji=emoji)
 
         react = await self.checker(user_msg, type_emb_check)
 
@@ -131,66 +103,75 @@ class PhrasesCog(commands.Cog, name="phrases"):
         await user_msg.clear_reaction(emoji="3️⃣")
         react2 = await self.checker(user_msg, gl_emb_check)
 
+        await user_msg.delete()
         if not react2:
-            await user_msg.delete()
             return await ctx.send("Reaction timeout reached!", delete_after=7)
         elif str(react2.emoji) == "❌":
-            await user_msg.delete()
             return await ctx.send("Process cancelled by user!", delete_after=7)
 
-        await user_msg.delete()
         t = await ctx.send(content="```Please input your phrase with {house} and {points} included!```")
 
-        msg = await self.client.wait_for('message', timeout=60, check=msg_check)
-
-        if "{house}" not in msg.content and "{points}" not in msg.content:
-            await t.delete()
-            return await ctx.send("Your message must contain {house} and {points}!", delete_after=7)
-
-        phrase_to_add = {
-            'type': types[str(react.emoji)],
-            'points': gl[":beg_two:"] if str(react.emoji) == "3️⃣" and str(react2.emoji) == "2️⃣" else gl[str(react2.emoji)],
-            'text': msg.content,
-            'author': ctx.author.nick or ctx.author.name,
-            'pos': len(json_data['queue'])
-        }
+        msg = await self.client.wait_for('message', timeout=90, check=msg_check)
+        text = msg.content
 
         await t.delete()
+        if "{house}" not in msg.content and "{points}" not in msg.content:
+            return await ctx.send("Your message must contain {house} and {points}!", delete_after=7)
 
-        json_data["queue"].append(phrase_to_add)
-        json.dump(json_data, open(self.client.random_phrases, 'w'), indent=4)
+        author_check = await ctx.send(
+            embed=discord.Embed(title="Do you want to add an author?", description="React with yes or no to choose."))
+
+        [await author_check.add_reaction(emoji=emoji) for emoji in ["✅", "❌"]]
+
+        author_react = await self.checker(author_check,
+                                   lambda reaction, user: user == ctx.author and str(reaction.emoji) in ["✅", "❌"])
+
+        await author_check.delete()
+        if author_react is None or str(author_react.emoji) == "❌":
+            author = ""
+        else:
+            try:
+                t = await ctx.send("```Type out the author```")
+                author_msg = await self.client.wait_for('message', timeout=60, check=msg_check)
+                author = author_msg.content
+                await t.delete()
+                await author_msg.delete()
+            except asyncio.TimeoutError:
+                await ctx.send("Author input timed out.\nUsing blank author", delete_after=7)
+                author = ""
+
+        RandomText(type=types[str(react.emoji)],
+                   points=gl[":beg_two:"] if str(react.emoji) == "3️⃣" and str(react2.emoji) == "2️⃣"
+                   else gl[str(react2.emoji)],
+                   text=text,
+                   author=author,
+                   queue=True).save()
+
+        await msg.delete()
+
         await ctx.send("Phrase added to queue, hopefully you'll see it soon! ;)", delete_after=10)
 
     @commands.command(aliases=["apprp"])
     async def approve_rphrases(self, ctx: discord.Message):
-        json_data = json.load(open(self.client.random_phrases))
-        if len(json_data['queue']) == 0:
+        queued_phrases = list(RandomText.objects(queue=True))
+        if not queued_phrases:
             return await ctx.send("No messages in queue!", delete_after=7)
 
-        def re_check(reaction, user):
-            return user == ctx.author and str(reaction.emoji) in ['◀️', '▶️', '✅', '🚫', '❌']
+        def embed_gen(queued_phrases):
+            return [discord.Embed(title="Approve Phrases", colour=0xffffff).add_field(name="Queue", value="".join(
+            [f"{list(queued_phrases).index(p) + 1} {p.text} | Type: {p.type} | Points: {p.points} | Author: {p.author}\n\n"
+             for p in rp])) for rp in chunked(queued_phrases, 4)]
 
-        def msg_check(msg: discord.Message):
-            return msg.author == ctx.author
-
-        def gen_menu(json_data):
-            random_phrases = [json_data['queue'][i:i + 4] for i in range(0, len(json_data['queue']), 4)]
-            embed_pages = []
-            for rp in random_phrases:
-                page = discord.Embed(title="Approve Phrases", colour=0xffffff)
-                page.add_field(name="Queue", value="".join([f"{p['pos']+1}. {p['text']} | type: {p['type']} | points: "
-                                                            f"{p['points']} | author: {p['author']}\n\n" for p in rp]))
-                embed_pages.append(page)
-            return embed_pages
-        embed_pages = gen_menu(json_data)
         index = 0
+        embed_pages = embed_gen(queued_phrases)
         menu = await ctx.send(embed=embed_pages[index])
-        for emoji in ['✅', '🚫', '❌', '◀️', '▶️']:
+        for emoji in ['✅', '❌', '🚫', '◀️', '▶️']:
             await menu.add_reaction(emoji=emoji)
         while True:
-            react = await self.checker(menu, re_check)
-            if str(react.emoji) == '🚫' or react is None:
-                json.dump(json_data, open(self.client.random_phrases, "w"), indent=4)
+            react = await self.checker(menu,
+                                       lambda reaction, user: user == ctx.author and
+                                                              str(reaction.emoji) in ['◀️', '▶️', '✅', '❌', '🚫'])
+            if react is None or str(react.emoji) == '🚫':
                 await menu.delete()
                 await ctx.send("Random phrases have been updated!", delete_after=10)
                 break
@@ -217,36 +198,47 @@ class PhrasesCog(commands.Cog, name="phrases"):
                         embed_pages[index].colour = 0xFF0000
                     await menu.edit(embed=embed_pages[index])
                     try:
-                        msg = await self.client.wait_for('message', timeout=60, check=msg_check)
+                        msg = await self.client.wait_for('message', timeout=60,
+                                                         check=lambda msg: msg.author == ctx.author)
                         int(msg.content)
                     except ValueError:
                         await ctx.send("Make sure to choose a number!", delete_after=5)
                         continue
-                    if int(msg.content) - 1 in range(len(json_data['queue'])):
+                    if int(msg.content) <= len(queued_phrases):
                         try:
                             if str(react.emoji) == '✅':
-                                json_data['phrases'].append([i for i in json_data['queue'] if i['pos'] == int(msg.content) - 1][0])
-                            json_data['queue'].pop(json_data['queue'].index([i for i in json_data['queue'] if i['pos'] == int(msg.content) - 1][0]))
-                            embed_pages = gen_menu(json_data)
+                                list(queued_phrases)[int(msg.content) - 1].update(queue=False)
+                            else:
+                                list(queued_phrases)[int(msg.content) - 1].delete()
+                            queued_phrases = RandomText.objects(queue=True)
+                            embed_pages = embed_gen(queued_phrases)
                         except IndexError:
                             await ctx.send("Make sure to choose a numbered item!", delete_after=5)
                     await msg.delete()
                 [await menu.add_reaction(emoji=emoji) for emoji in ['◀️', '▶️']]
-                embed_pages[index].title = "Approve Phrases"
-                embed_pages[index].colour = 0xFFFFFF
+                try:
+                    embed_pages[index].title = "Approve Phrases"
+                    embed_pages[index].colour = 0xFFFFFF
+                except IndexError:
+                    index = 0
+                    await menu.edit(embed=embed_pages[index])
                 await menu.edit(embed=embed_pages[index])
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.author == self.client.user:
+        if message.author == self.client.user or message.content.startswith("buh!"):
             return
-        if "buh!" in message.content:
+        elif not any(char in message.content for char in list(string.ascii_letters)):
             return
-        wchk = self.word_check(message.content)
-        if wchk[1]:
-            await message.delete()
-            return
-        self.update_phrase(message.content)
+        elif self.word_check(message.content)[1]:
+            return await message.delete()
+        for phrase in Phrase.objects:
+            if phrase.phrase in message.content:
+                PhraseCount.objects(phrase=phrase).upsert_one(inc__times=1,
+                                                              set__phrase=phrase,
+                                                              set__said=Player.objects(
+                                                                  dis_id=str(message.author.id)).first()
+                                                              )
 
 
 def setup(client):
