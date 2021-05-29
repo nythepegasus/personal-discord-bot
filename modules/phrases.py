@@ -224,7 +224,13 @@ class PhrasesCog(commands.Cog, name="Phrases"):
                 await menu.edit(embed=embed_pages[index])
 
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
+        if message.author.id == 379105703840841739 and "piss report" in message.content:
+            await message.add_reaction(emoji="👍")
+            return await message.reply("Nice piss report, bro.")
+        if message.author.id == 546074324134658049 and message.content.lower().startswith("yeah?"):
+            suicide = self.client.get_emoji(848332621020528651)
+            return await message.add_reaction(emoji=suicide)
         if message.author == self.client.user or message.content.startswith("buh!"):
             return
         elif not any(char in message.content for char in list(string.ascii_letters)):
