@@ -23,6 +23,7 @@ class GamesCog(commands.Cog, name="Games"):
             await msg.delete()
             return None
 
+    @commands.cooldown(1, 600, commands.BucketType.user)
     @commands.command(name="trivia")
     async def trivia(self, ctx):
         if not TriviaQuestion.objects:
