@@ -51,7 +51,11 @@ class PointsCog(commands.Cog, name="Points"):
             if self._scoreboard is None:
                 return
             elif self._scoreboard in await ctx.channel.history(limit=10).flatten():
-                await self._scoreboard.edit(embed=self.house_pts_emb())
+                house_emb = discord.Embed(title="House Points", colour=int(ctx.player.emb_conf['color'], 16))
+                for house in self.houses:
+                    house_emb.add_field(name=house, value=Points.objects(house=house, season=3).sum('points'),
+                                        inline=False)
+                await self._scoreboard.edit(embed=house_emb)
             else:
                 await self._scoreboard.delete()
                 self._scoreboard = None
