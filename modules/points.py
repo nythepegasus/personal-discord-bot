@@ -53,7 +53,7 @@ class PointsCog(commands.Cog, name="Points"):
             elif self._scoreboard in await ctx.channel.history(limit=10).flatten():
                 house_emb = discord.Embed(title="House Points", colour=int(ctx.player.emb_conf['color'], 16))
                 for house in self.houses:
-                    house_emb.add_field(name=house, value=Points.objects(house=house, season=3).sum('points'),
+                    house_emb.add_field(name=house, value=Points.objects(house=house, season=self.season).sum('points'),
                                         inline=False)
                 await self._scoreboard.edit(embed=house_emb)
             else:
@@ -73,7 +73,7 @@ class PointsCog(commands.Cog, name="Points"):
             await self._scoreboard.delete()
         house_emb = discord.Embed(title="House Points", colour=int(ctx.player.emb_conf['color'], 16))
         for house in self.houses:
-            house_emb.add_field(name=house, value=Points.objects(house=house, season=3).sum('points'), inline=False)
+            house_emb.add_field(name=house, value=Points.objects(house=house, season=self.season).sum('points'), inline=False)
         self._scoreboard = await ctx.send(embed=house_emb)
 
     @commands.cooldown(1, 180, commands.BucketType.user)
