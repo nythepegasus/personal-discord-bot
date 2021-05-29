@@ -61,6 +61,13 @@ class GamesCog(commands.Cog, name="Games"):
 
         await triv_msg.delete()
 
+    @trivia.error
+    async def trivia_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(f"Wait {round(error.retry_after, 2)} more seconds.", delete_after=7)
+        else:
+            raise error
+
     @commands.command(name="add_trivia")
     async def add_trivia(self, ctx):
         mp = {'1️⃣': 0, '2️⃣': 1, '3️⃣': 2, '4️⃣': 3}
@@ -140,6 +147,7 @@ class GamesCog(commands.Cog, name="Games"):
 
         await ctx.author.send("Your question has been added to the queue!\n"
                               "Hopefully you don't see it soon, and someone else gets to answer it!", delete_after=7)
+    
 
 
 def setup(client):

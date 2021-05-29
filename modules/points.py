@@ -176,7 +176,7 @@ class PointsCog(commands.Cog, name="Points"):
     @commands.command(aliases=['ps'])
     async def player_stats(self, ctx, player: typing.Optional[discord.User]):
         if player is not None:
-            ctx.player = Player.objects(dis_id)
+            ctx.player = Player.objects(dis_id=player.id)
             data = [i.points for i in Points.objects(player=Player.objects(dis_id=str(player.id))[0])]
         else:
             data = [i.points for i in Points.objects(player=ctx.player)]
@@ -223,8 +223,8 @@ class PointsCog(commands.Cog, name="Points"):
                 Points(player=giver, house=giver.house, type="pinner", points=20, season=self.season).save()
         if len(p) == 50:
             self.season_helper()
-            await ctx.invoke(self.client.get_command("archive_pins"))
-            await ctx.send("Season is over! Automagically starting new season. ;)")
+            await self.client.invoke(self.client.get_command("archive_pins"))
+            await channel.send("Season is over! Automagically starting new season. ;)")
 
     async def cog_command_error(self, ctx, error):
         if hasattr(ctx.command, 'on_error'):
