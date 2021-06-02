@@ -210,8 +210,8 @@ class PointsCog(commands.Cog, name="Points"):
         async for entry in channel.guild.audit_logs(action=discord.AuditLogAction.message_pin, limit=1):
             t = arrow.now().naive - entry.created_at
             if t.seconds == 0 or t.days < 0:
-                giver = Player.objects(dis_id=str(entry.user.id))
-                given = Player.objects(dis_id=str(entry.target.id))
+                giver = Player.objects(dis_id=str(entry.user.id)).first()
+                given = Player.objects(dis_id=str(entry.target.id)).first()
                 if giver.house != given.house:
                     await channel.send(f"{awarded} points to {given.house}!")
                     await channel.send(f"(And {awarder} for {giver.house} for finding such a spicy maymay ;))",
