@@ -2,6 +2,7 @@
 This is my own Discord bot that I have created for a personal server. It keeps track of phrases and different house's points. It's not fully complete, but it's pretty far along.
 ### Information
 All data is now stored in a MongoDB database. I use `mongoengine` to access MongoDB, and you can see all the code connecting the bot to MongoDB in `utils/schema.py`.
+I'll eventually add documentation on how I use MongoDB later.
 
 More information can be found in the wiki (TODO) about specific things.
 ### Installation
