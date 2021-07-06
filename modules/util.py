@@ -1,9 +1,10 @@
-import time
+import os
 import arrow
 import discord
 import psutil
 import speedtest
 import uptime
+from datetime import timedelta
 from discord.ext import commands
 
 
@@ -76,14 +77,15 @@ class UtilCog(commands.Cog, name="Utility"):
 
     @commands.command()
     async def stats(self, ctx):
-        cur_uptime = time.gmtime(uptime.uptime())
+        cur_uptime = str(timedelta(seconds=uptime.uptime())).split(".")[0]
+        cur_pid = psutil.Process(os.getpid())
         stat_emb = discord.Embed(title="Discord Bot's Server Stats", colour=0x00adff)
-        stat_emb.add_field(name="Current Uptime",
-                           value=f"{cur_uptime.tm_yday - 1}:{cur_uptime.tm_hour}:{str(cur_uptime.tm_min).zfill(2)}")
-        stat_emb.add_field(name="RAM Percentage", value=psutil.virtual_memory()[2])
-        stat_emb.add_field(name="CPU Percentage", value=psutil.cpu_percent())
-        stat_emb.set_footer(text="Proudly fixed with nano.")
-        await ctx.send(embed=stat_emb)
+        stat_emb.add_field(name="Current Uptime", value=cur_uptime)
+        stat_emb.add_field(name="Process Title", value=cur_pid.name())
+        stat_emb.add_field(name="PID", value=cur_pid.pid)
+        stat_emb.add_field(name="RAM Percentage", value=round(cur_pid.memory_percent(), 3))
+        stat_emb.add_field(name="CPU Percentage", value=round(cur_pid.cpu_percent(), 3))
+        await ctx.send(embed=stat_emb, delete_after=20)
 
     @commands.cooldown(1, 120, commands.BucketType.user)
     @commands.command()
